@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - NexTurn</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .auth-container {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .logo-text {
+            background: linear-gradient(90deg, #3B82F6 0%, #10B981 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 800;
+        }
+        .btn-primary {
+            background-color: #3B82F6;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
+        .input-focus:focus {
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="auth-container w-full max-w-md p-8">
+        <div class="text-center mb-8">
+            <div class="flex items-center justify-center">
+                <i data-feather="activity" class="h-8 w-8 text-primary"></i>
+                <span class="ml-2 text-2xl font-extrabold logo-text">NexTurn</span>
+            </div>
+            <h1 class="mt-6 text-2xl font-bold text-gray-900">Welcome back</h1>
+            <p class="mt-2 text-gray-600">Sign in to your NexTurn account</p>
+        </div>
+
+        <form class="space-y-6" action="/dashboard" method="POST">
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
+                <div class="mt-1">
+                    <input id="email" name="email" type="email" required 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg input-focus">
+                </div>
+            </div>
+
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                <div class="mt-1 relative">
+                    <input id="password" name="password" type="password" required 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg input-focus">
+                    <button type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                        <i data-feather="eye" class="h-5 w-5 text-gray-400 hover:text-gray-500"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <input id="remember" name="remember" type="checkbox" 
+                        class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                    <label for="remember" class="ml-2 block text-sm text-gray-600">
+                        Remember me
+                    </label>
+                </div>
+                <div class="text-sm">
+                    <a href="#" class="font-medium text-primary hover:text-primary/90">
+                        Forgot password?
+                    </a>
+                </div>
+            </div>
+
+            <div>
+                <button type="submit" 
+                    class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white btn-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                    Sign In
+                </button>
+            </div>
+        </form>
+
+        <div class="mt-6 text-center">
+            <p class="text-sm text-gray-600">
+                Don't have an account? 
+                <a href="signup.html" class="font-medium text-primary hover:text-primary/90">Sign up</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        feather.replace();
+        
+        // Toggle password visibility
+        document.querySelector('[data-feather="eye"]').addEventListener('click', function() {
+            const passwordInput = document.getElementById('password');
+            const icon = this;
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                feather.icons['eye-off'].toSvg().then(svg => {
+                    icon.outerHTML = svg;
+                });
+            } else {
+                passwordInput.type = 'password';
+                feather.icons['eye'].toSvg().then(svg => {
+                    icon.outerHTML = svg;
+                });
+            }
+        });
+    </script>
+</body>
+</html>
