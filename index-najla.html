@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NexTurn – Smart Queue Management System</title>
+  <link rel="icon" type="image/x-icon" href="assets/logo.jpg" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/feather-icons"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.dots.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#1800ad',
+            accent1: '#ff2e00',
+            accent2: '#0cc0df',
+            accent3: '#ff75ca',
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .hero-gradient {
+      background: linear-gradient(135deg, rgba(24,0,173,0.9), rgba(12,192,223,0.8));
+    }
+    .logo-text {
+      background: linear-gradient(90deg, #1800ad, #0cc0df, #ff75ca);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-weight: 800;
+    }
+    .logo-img { height: 2rem; width: auto; }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <div id="vanta-bg" class="fixed top-0 left-0 w-full h-full z-0"></div>
+
+  <nav class="relative z-10 bg-white/80 backdrop-blur-md shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center space-x-2">
+          <img src="assets/logo.jpg" alt="NexTurn Logo" class="logo-img">
+          <span class="text-2xl font-extrabold logo-text">NexTurn</span>
+        </div>
+        <div class="hidden md:flex md:items-center md:space-x-8">
+          <a href="#" class="text-gray-900 hover:text-primary px-3 py-2 text-sm font-medium">Features</a>
+          <a href="#" class="text-gray-900 hover:text-accent2 px-3 py-2 text-sm font-medium">For Businesses</a>
+          <a href="#" class="text-gray-900 hover:text-accent3 px-3 py-2 text-sm font-medium">For Users</a>
+          <a href="#" class="text-gray-900 hover:text-accent1 px-3 py-2 text-sm font-medium">Pricing</a>
+          <a href="login.html" class="text-primary hover:bg-primary/5 px-4 py-2 rounded-lg text-sm font-medium">Log In</a>
+          <a href="signup.html" class="bg-primary text-white hover:bg-accent1 px-4 py-2 rounded-lg text-sm font-medium">Sign Up</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <section class="relative z-10 hero-gradient overflow-hidden text-center py-20 px-6">
+    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white">Your Next Turn, Always Clear</h1>
+    <p class="mt-6 max-w-2xl mx-auto text-xl text-white/90">
+      Digital queue management for clinics, restaurants, banks, and service centers.
+      Reduce waiting time and enhance customer experience.
+    </p>
+    <div class="mt-10 flex justify-center space-x-4">
+      <a href="#" class="px-8 py-3 text-base font-medium text-primary bg-white rounded-md hover:bg-gray-100">Join a Queue</a>
+      <a href="#" class="px-8 py-3 text-base font-medium text-white bg-accent1 rounded-md hover:bg-accent2">For Businesses</a>
+    </div>
+  </section>
+
+  <section class="relative z-10 py-16 bg-white text-center">
+    <h2 class="text-base font-semibold tracking-wider text-primary uppercase">Next-Gen Queue Experience</h2>
+    <p class="mt-2 text-3xl font-extrabold text-gray-900 sm:text-4xl">Why Choose NexTurn</p>
+    <p class="mt-5 max-w-2xl mx-auto text-xl text-gray-500">
+      Reimagining waiting experiences for everyone — fast, fair, and efficient.
+    </p>
+  </section>
+
+  <footer class="relative z-10 bg-primary text-white py-12 px-4 text-center">
+    <div class="flex justify-center items-center space-x-2 mb-4">
+      <img src="assets/logo.jpg" alt="NexTurn Logo" class="logo-img">
+      <span class="text-2xl font-extrabold text-white">NexTurn</span>
+    </div>
+    <p class="text-white/80">Smart queue management solutions for modern businesses and organizations.</p>
+    <p class="mt-4 text-accent3 text-sm">&copy; 2025 NexTurn. All rights reserved.</p>
+  </footer>
+
+  <script>
+    VANTA.DOTS({
+      el: "#vanta-bg",
+      color: 0x1800ad,
+      color2: 0x0cc0df,
+      backgroundColor: 0xf8fafc,
+      size: 3.00,
+      spacing: 40.00
+    });
+    feather.replace();
+  </script>
+</body>
+</html>
