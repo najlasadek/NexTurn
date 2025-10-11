@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your Ticket</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="{{ url_for('static', filename='logo.jpg') }}" />
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center">
+    <div class="container mx-auto p-6 max-w-md">
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <h1 class="text-2xl font-bold text-primary mb-6 text-center">Your Active Ticket</h1>
+            <div class="ticket-info space-y-4">
+                <p class="text-gray-600">Ticket ID: <span class="font-medium">{{ ticket.id }}</span></p>
+                <p class="text-gray-600">Position: <span class="font-medium">#{{ ticket.position }}</span></p>
+                <p class="text-gray-600">Estimated Wait Time: <span class="font-medium">{{ ticket.eta }} minutes</span></p>
+            </div>
+            <a href="{{ url_for('home') }}" class="mt-6 block text-center text-accent2 hover:text-primary">Back to Home</a>
+
+            <div class="mt-8 border-t pt-6">
+                <h2 class="text-xl font-semibold mb-4">Alert Settings</h2>
+                <form action="{{ url_for('update_alerts') }}" method="POST" class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <label class="font-medium">Enable Alerts</label>
+                        <input type="checkbox" name="enabled" value="true" 
+                               {% if ticket.alerts_enabled %}checked{% endif %}
+                               class="h-4 w-4 text-accent2">
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block font-medium">Alert Channels</label>
+                        <div class="space-x-4">
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="channels" value="browser" 
+                                       {% if 'browser' in ticket.alert_channels %}checked{% endif %}
+                                       class="h-4 w-4 text-accent2">
+                                <span class="ml-2">Browser Notification</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="channels" value="email" 
+                                       {% if 'email' in ticket.alert_channels %}checked{% endif %}
+                                       class="h-4 w-4 text-accent2">
+                                <span class="ml-2">Email</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block font-medium mb-2">Alert Threshold</label>
+                        <select name="threshold" class="w-full border rounded-lg px-3 py-2">
+                            <option value="1" {% if ticket.alert_threshold == 1 %}selected{% endif %}>Position ≤ 1</option>
+                            <option value="3" {% if ticket.alert_threshold == 3 %}selected{% endif %}>Position ≤ 3</option>
+                            <option value="5" {% if ticket.alert_threshold == 5 %}selected{% endif %}>Position ≤ 5</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="w-full bg-accent2 text-white py-2 rounded-lg hover:bg-accent1">
+                        Save Alert Preferences
+                    </button>
+                </form>
+
+                {% if ticket.alerts_enabled %}
+                <div class="mt-4 p-3 bg-green-50 text-green-700 rounded-lg">
+                    Alert scheduled: when position ≤ {{ ticket.alert_threshold }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

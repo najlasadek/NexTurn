@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sign Up – NexTurn</title>
-  <link rel="icon" href="assets/logo.jpg" />
+  <link rel="icon" href="{{ url_for('static', filename='logo.jpg') }}" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/feather-icons"></script>
   <script>
@@ -25,20 +25,20 @@
 <body class="min-h-screen flex items-center justify-center p-6 bg-gray-50">
   <div class="w-full max-w-md p-8 bg-white rounded-xl shadow-lg">
     <div class="text-center mb-8">
-      <img src="assets/logo.jpg" alt="Logo" class="h-8 mx-auto mb-2">
+      <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Logo" class="h-8 mx-auto mb-2">
       <h1 class="text-2xl font-bold text-primary">Create your account</h1>
       <p class="text-gray-600">Join thousands using NexTurn</p>
     </div>
-    <form class="space-y-6">
-      <input type="text" placeholder="Full Name" class="w-full px-4 py-3 border rounded-lg focus:ring-accent2 focus:border-accent2" required />
-      <input type="email" placeholder="Email Address" class="w-full px-4 py-3 border rounded-lg focus:ring-accent2 focus:border-accent2" required />
-      <input type="password" placeholder="Password" class="w-full px-4 py-3 border rounded-lg focus:ring-accent2 focus:border-accent2" required />
-      <input type="text" placeholder="Organization / Branch Name" class="w-full px-4 py-3 border rounded-lg focus:ring-accent2 focus:border-accent2" required />
+    <form class="space-y-6" action="{{ url_for('signup') }}" method="POST">
+      <input type="text" name="fullname" placeholder="Full Name" class="w-full px-4 py-3 border rounded-lg focus:ring-accent2 focus:border-accent2" required />
+      <input type="email" name="email" placeholder="Email Address" class="w-full px-4 py-3 border rounded-lg focus:ring-accent2 focus:border-accent2" required />
+      <input type="password" name="password" placeholder="Password" class="w-full px-4 py-3 border rounded-lg focus:ring-accent2 focus:border-accent2" required />
+      <input type="text" name="organization" placeholder="Organization / Branch Name" class="w-full px-4 py-3 border rounded-lg focus:ring-accent2 focus:border-accent2" required />
       <button type="submit" class="w-full py-3 rounded-lg bg-primary text-white font-medium hover:bg-accent1">Create Account</button>
     </form>
     <div class="mt-6 text-center">
       <p class="text-sm text-gray-600">Already have an account?
-        <a href="login.html" class="text-accent2 hover:text-primary font-medium">Sign in</a>
+        <a href="{{ url_for('login') }}" class="text-accent2 hover:text-primary font-medium">Sign in</a>
       </p>
     </div>
   </div>
