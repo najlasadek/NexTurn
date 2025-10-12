@@ -33,5 +33,5 @@ class NotificationManager:
             'type': 'notification',
             'title': 'Queue Update',
             'message': f"Your turn is approaching! You are #{ticket_data['position']} in line.",
-            'icon': '/static/logo.jpg'
+            'icon': '/static/logo.png'
         }

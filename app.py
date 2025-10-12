@@ -80,7 +80,7 @@ def home():
 
 @app.route('/favicon.ico')
 def favicon():
-    return send_from_directory(app.static_folder, 'logo.jpg')
+    return send_from_directory(app.static_folder, 'logo.png')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
