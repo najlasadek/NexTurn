@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Queue History - NexTurn</title>
+    <link rel="icon" href="{{ url_for('static', filename='logo.png') }}" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#1800ad",
+              accent1: "#ff2e00",
+              accent2: "#ff9900",
+              accent3: "#ff75ca",
+            },
+          },
+        },
+      };
+    </script>
+</head>
+<body class="bg-gray-50">
+    <nav class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center space-x-2">
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="NexTurn" class="h-8 w-8"/>
+                    <span class="text-xl font-bold text-gray-900">NexTurn</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="{{ url_for('home') }}" class="text-gray-700 hover:text-primary">Home</a>
+                    <a href="{{ url_for('businesses_list') }}" class="text-gray-700 hover:text-accent2">Browse Businesses</a>
+                    <a href="{{ url_for('logout') }}" class="text-gray-700 hover:text-accent1">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-8">Your Queue History</h1>
+
+        {% if history %}
+            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Business</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Queue</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Position</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Wait Time</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for item in history %}
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    {{ item.business_name }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ item.queue_name }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    #{{ item.position }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ item.join_time }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                        {% if item.status == 'completed' %}bg-green-100 text-green-800
+                                        {% elif item.status == 'cancelled' %}bg-red-100 text-red-800
+                                        {% else %}bg-blue-100 text-blue-800{% endif %}">
+                                        {{ item.status|capitalize }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {% if item.wait_time %}
+                                        {{ "%.1f"|format(item.wait_time) }} min
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            <div class="text-center py-12 bg-white rounded-xl shadow-md">
+                <p class="text-gray-500 text-lg">No queue history yet.</p>
+                <p class="text-sm text-gray-400 mt-2">Join a queue to see your history here</p>
+                <a href="{{ url_for('businesses_list') }}" class="mt-4 inline-block px-6 py-3 bg-primary text-white rounded-lg hover:bg-accent1 transition">
+                    Browse Businesses
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
