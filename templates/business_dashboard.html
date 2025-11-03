@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Dashboard - NexTurn</title>
+    <link rel="icon" href="{{ url_for('static', filename='logo.png') }}" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#1800ad",
+              accent1: "#ff2e00",
+              accent2: "#ff9900",
+              accent3: "#ff75ca",
+            },
+          },
+        },
+      };
+    </script>
+</head>
+<body class="bg-gray-50">
+    <nav class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center space-x-2">
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="NexTurn" class="h-8 w-8"/>
+                    <span class="text-xl font-bold text-gray-900">NexTurn Business</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="{{ url_for('home') }}" class="text-gray-700 hover:text-primary">Home</a>
+                    <a href="{{ url_for('logout') }}" class="text-gray-700 hover:text-accent1">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">Your Businesses</h1>
+            <a href="{{ url_for('register_business') }}" class="px-6 py-3 bg-primary text-white rounded-lg hover:bg-accent1 transition">
+                Register New Business
+            </a>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="space-y-2 mb-6">
+              {% for category, message in messages %}
+                <div class="rounded-lg px-4 py-3 {% if category=='success' %}bg-green-50 text-green-800 border border-green-200{% elif category=='info' %}bg-blue-50 text-blue-800 border border-blue-200{% else %}bg-red-50 text-red-800 border border-red-200{% endif %}">
+                  {{ message }}
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        {% if businesses %}
+            <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {% for business in businesses %}
+                <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition">
+                    <h2 class="text-xl font-bold text-gray-900 mb-2">{{ business.name }}</h2>
+                    <p class="text-gray-600 mb-1">{{ business.category }}</p>
+                    <p class="text-sm text-gray-500 mb-4">{{ business.address }}</p>
+
+                    <div class="border-t pt-4 mt-4">
+                        <h3 class="text-sm font-semibold text-gray-700 mb-3">Queues:</h3>
+                        {% if business.queues %}
+                            <div class="space-y-2 mb-4">
+                                {% for queue in business.queues %}
+                                <a href="{{ url_for('manage_queue', business_id=business.id, queue_id=queue.id) }}"
+                                   class="block px-4 py-2 bg-gray-100 hover:bg-accent2 hover:text-white rounded-lg transition">
+                                    {{ queue.name }}
+                                    <span class="text-xs">
+                                        {% if queue.is_active %}
+                                            (Active)
+                                        {% else %}
+                                            (Inactive)
+                                        {% endif %}
+                                    </span>
+                                </a>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-sm text-gray-500 italic mb-4">No queues available</p>
+                        {% endif %}
+                        <a href="{{ url_for('view_feedback', business_id=business.id) }}"
+                           class="block w-full text-center px-4 py-2 bg-accent3 text-white rounded-lg hover:bg-primary transition">
+                            View Customer Feedback
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-12">
+                <p class="text-gray-500 text-lg mb-4">You haven't registered any businesses yet.</p>
+                <a href="{{ url_for('register_business') }}" class="inline-block px-6 py-3 bg-primary text-white rounded-lg hover:bg-accent1 transition">
+                    Register Your First Business
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
