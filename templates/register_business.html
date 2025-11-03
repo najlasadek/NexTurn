@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Business - NexTurn</title>
+    <link rel="icon" href="{{ url_for('static', filename='logo.png') }}" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#1800ad",
+              accent1: "#ff2e00",
+              accent2: "#ff9900",
+              accent3: "#ff75ca",
+            },
+          },
+        },
+      };
+    </script>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6 bg-gray-50">
+    <div class="w-full max-w-2xl bg-white shadow-lg rounded-2xl p-8">
+        <div class="flex items-center justify-between mb-6">
+            <a href="{{ url_for('business_dashboard') }}" class="flex items-center gap-2">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="NexTurn" class="h-8 w-8"/>
+                <span class="text-xl font-bold text-gray-900">NexTurn</span>
+            </a>
+        </div>
+
+        <h1 class="text-2xl font-bold text-gray-900 mb-2">Register Your Business</h1>
+        <p class="text-gray-600 mb-6">Start managing queues digitally</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="space-y-2 mb-4">
+              {% for category, message in messages %}
+                <div class="rounded-lg px-4 py-3 text-sm {% if category=='success' %}bg-green-50 text-green-800 border border-green-200{% else %}bg-red-50 text-red-800 border border-red-200{% endif %}">
+                  {{ message }}
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <form class="space-y-5" method="POST" action="{{ url_for('register_business') }}">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Business Name</label>
+                <input type="text" name="name" placeholder="e.g., Joe's Café"
+                       class="w-full px-4 py-3 border rounded-lg focus:ring-accent2 focus:border-accent2" required/>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                <select name="category" class="w-full px-4 py-3 border rounded-lg focus:ring-accent2 focus:border-accent2" required>
+                    <option value="">Select a category</option>
+                    <option value="Restaurant">Restaurant</option>
+                    <option value="Café">Café</option>
+                    <option value="Clinic">Clinic</option>
+                    <option value="Salon">Salon</option>
+                    <option value="Bank">Bank</option>
+                    <option value="Government">Government Service</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <textarea name="description" rows="3" placeholder="Brief description of your business"
+                          class="w-full px-4 py-3 border rounded-lg focus:ring-accent2 focus:border-accent2"></textarea>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                <input type="text" name="address" placeholder="123 Main St, City"
+                       class="w-full px-4 py-3 border rounded-lg focus:ring-accent2 focus:border-accent2" required/>
+            </div>
+
+            <button type="submit" class="w-full bg-primary hover:bg-accent1 text-white font-semibold py-3 rounded-lg transition">
+                Register Business
+            </button>
+        </form>
+
+        <div class="mt-6 text-center">
+            <a href="{{ url_for('business_dashboard') }}" class="text-sm text-accent2 hover:text-primary font-medium">
+                Back to Dashboard
+            </a>
+        </div>
+    </div>
+</body>
+</html>
