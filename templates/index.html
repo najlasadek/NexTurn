@@ -67,24 +67,19 @@
           </div>
           <div class="hidden md:flex md:items-center md:space-x-8">
             <a
-              href="#"
+              href="{{ url_for('businesses_list') }}"
               class="text-gray-900 hover:text-primary px-3 py-2 text-sm font-medium"
-              >Features</a
+              >Browse Businesses</a
             >
             <a
-              href="#"
+              href="{{ url_for('business_dashboard') }}"
               class="text-gray-900 hover:text-accent2 px-3 py-2 text-sm font-medium"
-              >For Businesses</a
+              >Business Dashboard</a
             >
             <a
-              href="#"
+              href="{{ url_for('queue_history_page') }}"
               class="text-gray-900 hover:text-accent3 px-3 py-2 text-sm font-medium"
-              >For Users</a
-            >
-            <a
-              href="#"
-              class="text-gray-900 hover:text-accent1 px-3 py-2 text-sm font-medium"
-              >Pricing</a
+              >My History</a
             >
             <a
               href="{{ url_for('logout') }}"
