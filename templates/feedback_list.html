@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Feedback - {{ business_name }}</title>
+    <link rel="icon" href="{{ url_for('static', filename='logo.png') }}" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#1800ad",
+              accent1: "#ff2e00",
+              accent2: "#ff9900",
+              accent3: "#ff75ca",
+            },
+          },
+        },
+      };
+    </script>
+</head>
+<body class="bg-gray-50">
+    <nav class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center space-x-2">
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="NexTurn" class="h-8 w-8"/>
+                    <span class="text-xl font-bold text-gray-900">NexTurn Business</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="{{ url_for('business_dashboard') }}" class="text-gray-700 hover:text-primary">Dashboard</a>
+                    <a href="{{ url_for('logout') }}" class="text-gray-700 hover:text-accent1">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">Customer Feedback</h1>
+            <p class="text-gray-600 mt-2">{{ business_name }}</p>
+        </div>
+
+        <!-- Average Rating -->
+        <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+            <div class="text-center">
+                <p class="text-sm text-gray-600 mb-2">Average Rating</p>
+                <p class="text-5xl font-bold text-accent2">{{ avg_rating }}</p>
+                <p class="text-sm text-gray-500 mt-2">Based on {{ feedback|length }} review(s)</p>
+            </div>
+        </div>
+
+        <!-- Feedback List -->
+        {% if feedback %}
+            <div class="space-y-4">
+                {% for item in feedback %}
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <div class="flex items-start justify-between mb-3">
+                        <div>
+                            <p class="font-semibold text-gray-900">{{ item.user_name }}</p>
+                            <p class="text-sm text-gray-500">{{ item.created_at }}</p>
+                        </div>
+                        <div class="flex items-center space-x-1">
+                            {% for i in range(1, 6) %}
+                                <svg class="w-5 h-5 {% if i <= item.rating %}text-accent2{% else %}text-gray-300{% endif %}" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                </svg>
+                            {% endfor %}
+                            <span class="ml-2 text-sm font-semibold text-gray-700">{{ item.rating }}/5</span>
+                        </div>
+                    </div>
+                    {% if item.comment %}
+                        <p class="text-gray-700">{{ item.comment }}</p>
+                    {% else %}
+                        <p class="text-gray-400 italic">No comment provided</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-12 bg-white rounded-xl shadow-md">
+                <p class="text-gray-500 text-lg">No feedback yet</p>
+                <p class="text-sm text-gray-400 mt-2">Customer reviews will appear here</p>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
