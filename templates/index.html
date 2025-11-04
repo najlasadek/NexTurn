@@ -1,162 +1,364 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NexTurn – Smart Queue Management System</title>
-    <link
-      rel="icon"
-      type="image/x-icon"
-      href="{{ url_for('static', filename='logo.png') }}"
-    />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/feather-icons"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.dots.min.js"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              primary: "#1800ad",
-              accent1: "#ff2e00",
-              accent2: "#0cc0df",
-              accent3: "#ff75ca",
-            },
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NexTurn – Smart Queue Management System</title>
+
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='logo.png') }}"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet"/>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#1800ad",
+            accent1: "#ff2e00",
+            accent2: "#0cc0df",
+            accent3: "#ff75ca",
           },
-        },
-      };
-    </script>
-    <style>
-      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
-      body {
-        font-family: "Inter", sans-serif;
+          boxShadow: {
+            soft: "0 10px 30px rgba(0,0,0,.08)",
+          }
+        }
       }
-      .hero-gradient {
-        background: linear-gradient(
-          135deg,
-          rgba(24, 0, 173, 0.9),
-          rgba(12, 192, 223, 0.8)
-        );
-      }
-      .logo-text {
-        background: linear-gradient(90deg, #2520fd, #0cc0df, #ff75ca);
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-        font-weight: 800;
-      }
-      .logo-img {
-        height: 2rem;
-        width: auto;
-      }
-    </style>
-  </head>
-  <body class="bg-gray-50">
-    <div id="vanta-bg" class="fixed top-0 left-0 w-full h-full z-0"></div>
+    }
+  </script>
 
-    <nav class="relative z-10 bg-white/80 backdrop-blur-md shadow-sm">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-          <div class="flex items-center space-x-2">
-            <img
-              src="{{ url_for('static', filename='logo.png') }}"
-              alt="NexTurn Logo"
-              class="logo-img"
-            />
-            <span class="text-2xl font-extrabold logo-text">NexTurn</span>
+  <style>
+    html, body { height: 100%; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, 'Helvetica Neue', Arial;
+      overflow-x: hidden;
+      background: linear-gradient(135deg, #1800ad, #0cc0df);
+      transition: background 1s ease;
+    }
+
+    /* Sticky, glassy navbar */
+    .nav-glass {
+      backdrop-filter: blur(10px) saturate(1.1);
+      -webkit-backdrop-filter: blur(10px) saturate(1.1);
+      background: rgba(255,255,255,0.75);
+    }
+
+    /* --- Animated "NexTurn" watermark --- */
+    .marquee {
+      position: fixed; inset: 0; pointer-events: none; opacity: 0.07;
+      overflow: hidden; z-index: 0;
+    }
+    .marquee__inner {
+      position: absolute; left: -5%; right: -5%; top: 12%;
+      display: flex; gap: 4rem; white-space: nowrap;
+      will-change: transform; animation: marquee 30s linear infinite;
+    }
+    .marquee--reverse .marquee__inner { top: auto; bottom: 10%; animation-direction: reverse; }
+    .marquee__row {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800; letter-spacing: .08em;
+      font-size: clamp(3.5rem, 10vw, 12rem);
+      line-height: 1;
+      -webkit-text-stroke: 2px rgba(255,255,255,0.6);
+      color: transparent;
+      text-shadow: 0 0 30px rgba(255,255,255,0.25);
+      user-select: none;
+    }
+    .marquee__row span {
+      display:inline-block;
+      background: linear-gradient(90deg, rgba(255,255,255,0.9), rgba(255,255,255,0.5));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      filter: drop-shadow(0 2px 12px rgba(0,0,0,0.35));
+      margin-right: 2.5rem;
+    }
+    @keyframes marquee { to { transform: translateX(-50%); } }
+
+    /* Floating bubbles */
+    .bg-bubbles { position: fixed; inset: 0; z-index: 0; overflow:hidden; pointer-events:none; }
+    .bg-bubbles li {
+      position:absolute; list-style:none; width:34px; height:34px; border-radius:9999px;
+      background: rgba(255,255,255,0.12); box-shadow: inset 0 8px 30px rgba(0,0,0,0.25);
+      bottom:-160px; animation: floatUp 22s linear infinite; transform: translateZ(0);
+    }
+    @keyframes floatUp {
+      0% { transform: translateY(0) rotate(0); opacity:1; }
+      100% { transform: translateY(-1100px) rotate(720deg); opacity:0; }
+    }
+
+    .scrim { position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:0; }
+    .glass { backdrop-filter: blur(10px) saturate(1.1); -webkit-backdrop-filter: blur(10px) saturate(1.1); }
+
+    /* Accent shuffle button */
+    .floating-controls { position: fixed; top: 14px; right: 14px; z-index: 40; }
+
+    /* Section spacing */
+    .section { position: relative; z-index: 10; }
+  </style>
+</head>
+
+<body class="min-h-screen relative">
+
+  <!-- Gradient readability layer -->
+  <div class="scrim"></div>
+
+  <!-- Animated watermark -->
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee__inner">
+      <div class="marquee__row">
+        <span>NexTurn</span><span>NexTurn</span><span>NexTurn</span>
+        <span>NexTurn</span><span>NexTurn</span><span>NexTurn</span>
+      </div>
+    </div>
+  </div>
+  <div class="marquee marquee--reverse" aria-hidden="true">
+    <div class="marquee__inner">
+      <div class="marquee__row">
+        <span>NexTurn</span><span>NexTurn</span><span>NexTurn</span>
+        <span>NexTurn</span><span>NexTurn</span><span>NexTurn</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating bubbles -->
+  <ul class="bg-bubbles" aria-hidden="true">
+    <li></li><li></li><li></li><li></li><li></li>
+    <li></li><li></li><li></li><li></li><li></li>
+  </ul>
+
+  <!-- Accent Shuffle -->
+  <div class="floating-controls hidden sm:flex">
+    <button id="accentBtn" class="glass rounded-xl shadow-soft px-3 py-2 text-xs font-medium text-white/90 bg-white/10 hover:bg-white/20 transition flex items-center gap-2">
+      <i data-feather="aperture"></i><span>Accent Shuffle</span>
+    </button>
+  </div>
+
+  <!-- NAV -->
+  <header class="sticky top-0 z-30 nav-glass shadow-sm">
+    <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <a href="{{ url_for('home') }}" class="flex items-center gap-2">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="NexTurn Logo" class="h-8 w-8 rounded-xl ring-1 ring-white/40"/>
+        <span class="text-xl font-extrabold text-gray-900">NexTurn</span>
+      </a>
+
+      <!-- Desktop -->
+      <div class="hidden md:flex items-center gap-6">
+        <a href="{{ url_for('businesses_list') }}" class="text-gray-900 hover:text-primary text-sm font-medium">Browse Businesses</a>
+        <a href="{{ url_for('business_dashboard') }}" class="text-gray-900 hover:text-accent2 text-sm font-medium">Business Dashboard</a>
+        <a href="{{ url_for('queue_history_page') }}" class="text-gray-900 hover:text-accent3 text-sm font-medium">My History</a>
+        <a href="{{ url_for('logout') }}" class="text-gray-900 hover:text-accent1 text-sm font-medium">Logout</a>
+      </div>
+
+      <!-- Mobile toggle -->
+      <button id="menuToggle" class="md:hidden p-2 rounded-lg hover:bg-white/60" aria-label="Toggle menu">
+        <i data-feather="menu"></i>
+      </button>
+    </nav>
+
+    <!-- Mobile sheet -->
+    <div id="mobileMenu" class="md:hidden hidden border-t border-white/40 bg-white/80 backdrop-blur">
+      <div class="px-4 py-3 space-y-2">
+        <a href="{{ url_for('businesses_list') }}" class="block px-3 py-2 rounded-lg hover:bg-white/70 text-gray-900">Browse Businesses</a>
+        <a href="{{ url_for('business_dashboard') }}" class="block px-3 py-2 rounded-lg hover:bg-white/70 text-gray-900">Business Dashboard</a>
+        <a href="{{ url_for('queue_history_page') }}" class="block px-3 py-2 rounded-lg hover:bg-white/70 text-gray-900">My History</a>
+        <a href="{{ url_for('logout') }}" class="block px-3 py-2 rounded-lg hover:bg-white/70 text-gray-900">Logout</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="section relative">
+    <div class="max-w-7xl mx-auto px-6 pt-16 pb-20">
+      <div class="grid lg:grid-cols-2 gap-10 items-center">
+        <div>
+          <div class="inline-flex items-center gap-2 bg-white/70 glass border border-white/20 rounded-full px-3 py-1 text-xs font-medium text-gray-700 shadow-soft">
+            <i data-feather="zap" class="w-3.5 h-3.5 text-primary"></i>
+            Live queue updates • Wait-time predictions
           </div>
-          <div class="hidden md:flex md:items-center md:space-x-8">
-            <a
-              href="{{ url_for('businesses_list') }}"
-              class="text-gray-900 hover:text-primary px-3 py-2 text-sm font-medium"
-              >Browse Businesses</a
-            >
-            <a
-              href="{{ url_for('business_dashboard') }}"
-              class="text-gray-900 hover:text-accent2 px-3 py-2 text-sm font-medium"
-              >Business Dashboard</a
-            >
-            <a
-              href="{{ url_for('queue_history_page') }}"
-              class="text-gray-900 hover:text-accent3 px-3 py-2 text-sm font-medium"
-              >My History</a
-            >
-            <a
-              href="{{ url_for('logout') }}"
-              class="text-gray-900 hover:text-accent1 px-3 py-2 text-sm font-medium"
-              >Logout</a
-            >
+          <h1 class="mt-5 text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight">
+            Your Next <span class="text-accent3">Turn</span>, Always Clear
+          </h1>
+          <p class="mt-4 text-white/90 text-lg">
+            Digital queue management for clinics, restaurants, banks, and service centers.
+            Reduce waiting time and deliver a delightful experience.
+          </p>
 
+          <div class="mt-8 flex flex-wrap gap-3">
+            <a href="{{ url_for('join_queue') }}" class="bg-white text-primary hover:bg-gray-100 font-semibold px-6 py-3 rounded-lg shadow-soft">Join a Queue</a>
+            <a href="{{ url_for('business_dashboard') }}" class="bg-primary/90 hover:bg-primary text-white font-semibold px-6 py-3 rounded-lg shadow-soft">For Businesses</a>
+          </div>
+
+          <div class="mt-8 flex flex-wrap items-center gap-6 text-white/80">
+            <div class="flex items-center gap-2"><i data-feather="clock" class="w-4 h-4"></i><span>Cut wait times</span></div>
+            <div class="flex items-center gap-2"><i data-feather="smartphone" class="w-4 h-4"></i><span>Mobile check-in</span></div>
+            <div class="flex items-center gap-2"><i data-feather="bar-chart-2" class="w-4 h-4"></i><span>Realtime analytics</span></div>
+          </div>
+        </div>
+
+        <!-- Hero Card -->
+        <div class="bg-white/90 glass rounded-2xl border border-white/30 shadow-2xl p-6">
+          <div class="flex items-center gap-3">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="NexTurn" class="h-10 w-10 rounded-xl ring-1 ring-gray-200"/>
+            <div>
+              <div class="text-sm text-gray-500">Live Queue</div>
+              <div class="text-xl font-bold text-gray-900">Downtown Clinic</div>
+            </div>
+          </div>
+          <div class="mt-6 grid grid-cols-3 gap-4">
+            <div class="rounded-xl border p-4 text-center">
+              <div class="text-3xl font-extrabold text-primary">7</div>
+              <div class="text-xs text-gray-500 mt-1">People waiting</div>
+            </div>
+            <div class="rounded-xl border p-4 text-center">
+              <div class="text-3xl font-extrabold text-primary">12m</div>
+              <div class="text-xs text-gray-500 mt-1">ETA</div>
+            </div>
+            <div class="rounded-xl border p-4 text-center">
+              <div class="text-3xl font-extrabold text-primary">A-17</div>
+              <div class="text-xs text-gray-500 mt-1">Now serving</div>
+            </div>
+          </div>
+          <div class="mt-6 flex gap-3">
+            <a href="{{ url_for('join_queue') }}" class="flex-1 bg-primary text-white font-semibold py-3 rounded-lg text-center hover:bg-primary/90">Join Now</a>
+            <a href="{{ url_for('businesses_list') }}" class="flex-1 border font-semibold py-3 rounded-lg text-center hover:bg-gray-50">Browse</a>
           </div>
         </div>
       </div>
-    </nav>
+    </div>
+  </section>
 
-    <section
-      class="relative z-10 hero-gradient overflow-hidden text-center py-20 px-6"
-    >
-      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white">
-        Your Next Turn, Always Clear
-      </h1>
-      <p class="mt-6 max-w-2xl mx-auto text-xl text-white/90">
-        Digital queue management for clinics, restaurants, banks, and service
-        centers. Reduce waiting time and enhance customer experience.
-      </p>
-      <div class="mt-10 flex justify-center space-x-4">
-        <a
-          href="{{ url_for('join_queue') }}"
-          class="px-8 py-3 text-base font-medium text-primary bg-white rounded-md hover:bg-gray-100"
-          >Join a Queue</a
-        >
-        <a
-          href="#"
-          class="px-8 py-3 text-base font-medium text-white bg-accent1 rounded-md hover:bg-accent2"
-          >For Businesses</a
-        >
+  <!-- FEATURES -->
+  <section class="section py-16">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center">
+        <h2 class="text-base font-semibold tracking-wider text-white/90 uppercase">Next-Gen Queue Experience</h2>
+        <p class="mt-2 text-3xl sm:text-4xl font-extrabold text-white">Why Choose NexTurn</p>
+        <p class="mt-4 max-w-2xl mx-auto text-white/80">Fast, fair, and efficient queues for everyone.</p>
       </div>
-    </section>
 
-    <section class="relative z-10 py-16 bg-white text-center">
-      <h2 class="text-base font-semibold tracking-wider text-primary uppercase">
-        Next-Gen Queue Experience
-      </h2>
-      <p class="mt-2 text-3xl font-extrabold text-gray-900 sm:text-4xl">
-        Why Choose NexTurn
-      </p>
-      <p class="mt-5 max-w-2xl mx-auto text-xl text-gray-500">
-        Reimagining waiting experiences for everyone — fast, fair, and
-        efficient.
-      </p>
-    </section>
-
-    <footer class="relative z-10 bg-primary text-white py-12 px-4 text-center">
-      <div class="flex justify-center items-center space-x-2 mb-4">
-        <img
-          src="{{ url_for('static', filename='logo.png') }}"
-          alt="NexTurn Logo"
-          class="logo-img"
-        />
-        <span class="text-2xl font-extrabold text-white">NexTurn</span>
+      <div class="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white/90 glass rounded-2xl border border-white/30 p-6">
+          <i data-feather="activity" class="w-7 h-7 text-primary"></i>
+          <h3 class="mt-4 font-bold text-gray-900">Smart Predictions</h3>
+          <p class="mt-2 text-gray-600 text-sm">AI-aided estimates for wait times keep customers informed and calm.</p>
+        </div>
+        <div class="bg-white/90 glass rounded-2xl border border-white/30 p-6">
+          <i data-feather="bell" class="w-7 h-7 text-primary"></i>
+          <h3 class="mt-4 font-bold text-gray-900">Alerts & Reminders</h3>
+          <p class="mt-2 text-gray-600 text-sm">SMS/app notifications when your turn approaches — no crowding.</p>
+        </div>
+        <div class="bg-white/90 glass rounded-2xl border border-white/30 p-6">
+          <i data-feather="grid" class="w-7 h-7 text-primary"></i>
+          <h3 class="mt-4 font-bold text-gray-900">Multi-Branch</h3>
+          <p class="mt-2 text-gray-600 text-sm">Manage queues across clinics, branches, or departments in one place.</p>
+        </div>
+        <div class="bg-white/90 glass rounded-2xl border border-white/30 p-6">
+          <i data-feather="bar-chart" class="w-7 h-7 text-primary"></i>
+          <h3 class="mt-4 font-bold text-gray-900">Realtime Analytics</h3>
+          <p class="mt-2 text-gray-600 text-sm">Dashboards for throughput, peak hours, and SLA performance.</p>
+        </div>
       </div>
-      <p class="text-white/80">
-        Smart queue management solutions for modern businesses and
-        organizations.
-      </p>
-      <p class="mt-4 text-accent3 text-sm">
-        &copy; 2025 NexTurn. All rights reserved.
-      </p>
-    </footer>
+    </div>
+  </section>
 
-    <script>
-      VANTA.DOTS({
-        el: "#vanta-bg",
-        color: 0x1800ad,
-        color2: 0x0cc0df,
-        backgroundColor: 0xf8fafc,
-        size: 3.0,
-        spacing: 40.0,
+  <!-- HOW IT WORKS -->
+  <section class="section py-16">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center">
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-white">How It Works</h2>
+        <p class="mt-2 text-white/80">Three simple steps to a queue-free day.</p>
+      </div>
+      <div class="mt-10 grid lg:grid-cols-3 gap-6">
+        <div class="bg-white/90 glass rounded-2xl border border-white/30 p-6">
+          <div class="flex items-center gap-3">
+            <span class="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">1</span>
+            <h3 class="font-bold text-gray-900">Find a business</h3>
+          </div>
+          <p class="mt-2 text-gray-600 text-sm">Browse nearby clinics, restaurants, or banks and view live queues.</p>
+        </div>
+        <div class="bg-white/90 glass rounded-2xl border border-white/30 p-6">
+          <div class="flex items-center gap-3">
+            <span class="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">2</span>
+            <h3 class="font-bold text-gray-900">Join & relax</h3>
+          </div>
+          <p class="mt-2 text-gray-600 text-sm">Join virtually and get accurate time estimates with notifications.</p>
+        </div>
+        <div class="bg-white/90 glass rounded-2xl border border-white/30 p-6">
+          <div class="flex items-center gap-3">
+            <span class="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">3</span>
+            <h3 class="font-bold text-gray-900">Get served</h3>
+          </div>
+          <p class="mt-2 text-gray-600 text-sm">Arrive just on time when it’s your turn — no more waiting rooms.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="section bg-white/90 glass border-t border-white/30">
+    <div class="max-w-7xl mx-auto px-6 py-10">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-2">
+          <img src="{{ url_for('static', filename='logo.png') }}" alt="NexTurn Logo" class="h-8 w-8 rounded-xl ring-1 ring-gray-200"/>
+          <span class="text-xl font-extrabold text-gray-900">NexTurn</span>
+        </div>
+        <p class="text-gray-600 text-sm">&copy; 2025 NexTurn. All rights reserved.</p>
+        <div class="flex items-center gap-4 text-gray-600">
+          <a href="{{ url_for('businesses_list') }}" class="hover:text-primary text-sm">Browse</a>
+          <a href="{{ url_for('business_dashboard') }}" class="hover:text-primary text-sm">Business</a>
+          <a href="{{ url_for('queue_history_page') }}" class="hover:text-primary text-sm">History</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    feather.replace();
+
+    // Mobile menu
+    const menuBtn = document.getElementById('menuToggle');
+    const mobile = document.getElementById('mobileMenu');
+    menuBtn?.addEventListener('click', () => mobile.classList.toggle('hidden'));
+
+    // Bubbles randomization
+    document.querySelectorAll('.bg-bubbles li').forEach((b, i) => {
+      b.style.left = `${Math.random() * 100}%`;
+      const size = 24 + Math.random() * 44;
+      b.style.width = `${size}px`;
+      b.style.height = `${size}px`;
+      b.style.animationDelay = `${i * 1.1}s`;
+      b.style.animationDuration = `${18 + Math.random() * 20}s`;
+      b.style.opacity = `${0.06 + Math.random() * 0.2}`;
+    });
+
+    // Parallax motion
+    window.addEventListener('mousemove', (e) => {
+      const { innerWidth: w, innerHeight: h } = window;
+      const dx = (e.clientX - w/2) / w;
+      const dy = (e.clientY - h/2) / h;
+      document.querySelectorAll('.bg-bubbles li').forEach((b, i) => {
+        const strength = (i % 5 + 1) * 2;
+        b.style.transform = `translate(${dx * strength}px, ${dy * strength}px)`;
       });
-      feather.replace();
-    </script>
-  </body>
+    });
+
+    // Accent shuffle (keeps brand default; lets you demo alt themes)
+    const accentBtn = document.getElementById('accentBtn');
+    const accents = [
+      { from:'#1800ad', to:'#0cc0df' }, // default brand
+      { from:'#4f46e5', to:'#a855f7' },
+      { from:'#06b6d4', to:'#6366f1' },
+      { from:'#22c55e', to:'#0ea5e9' },
+      { from:'#f97316', to:'#ef4444' },
+      { from:'#e11d48', to:'#7c3aed' },
+    ];
+    accentBtn?.addEventListener('click', () => {
+      const a = accents[Math.floor(Math.random() * accents.length)];
+      document.body.style.background = `linear-gradient(135deg, ${a.from}, ${a.to})`;
+      // Optional: tint hero chips/buttons dynamically (example)
+      document.querySelectorAll('.text-primary').forEach(el => el.style.color = a.from);
+      document.querySelectorAll('.bg-primary, .bg-primary\\/90').forEach(el => el.style.background = a.from);
+    });
+  </script>
+</body>
 </html>
