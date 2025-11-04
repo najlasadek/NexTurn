@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your Ticket</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" href="{{ url_for('static', filename='logo.png') }}" />
@@ -19,9 +21,9 @@
       };
     </script>
 </head>
-<body class="bg-gray-50 min-h-screen flex items-center justify-center">
-    <div class="container mx-auto p-6 max-w-md">
-        <div class="bg-white rounded-xl shadow-lg p-8">
+<body class="bg-gray-50 min-h-screen">
+    <div class="w-full min-h-screen p-4 sm:p-6 md:max-w-md md:mx-auto md:flex md:items-center md:justify-center">
+        <div class="bg-white rounded-xl shadow-lg p-6 sm:p-8 w-full">
             <h1 class="text-2xl font-bold text-primary mb-6 text-center">Your Active Ticket</h1>
 
             {% with messages = get_flashed_messages(with_categories=true) %}
