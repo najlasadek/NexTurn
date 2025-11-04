@@ -2,10 +2,25 @@
 
 ## Setup
 
+It is recommended to use a virtual environment for dependencies.
+
+- To create and activate a virtual environment, run:
+  ```bash
+  python -m venv venv
+  # On Windows:
+  venv\Scripts\activate
+  # On Mac/Linux:
+  source venv/bin/activate
+  ```
+- Then, install all required dependencies:
+  ```bash
+  pip install -r requirements.txt
+  ```
+
 ### Start the Application
 
 ```bash
-cd "C:\Users\sadek\Desktop\AUB\9-Fall2025\430recitation\430-project\NexTurn"
+cd path/to/NexTurn
 python app.py
 ```
 
@@ -16,6 +31,7 @@ Then open your browser to: **http://127.0.0.1:5000**
 ## Test Scenario 1: Customer Journey
 
 ### 1. Sign Up as a Customer
+
 1. Navigate to http://127.0.0.1:5000
 2. Click "Sign up" on the login page
 3. Fill in the form:
@@ -28,6 +44,7 @@ Then open your browser to: **http://127.0.0.1:5000**
 5. **Expected Result**: Redirected to login page with success message
 
 ### 2. Login as Customer
+
 1. Enter credentials:
    - Email: `john@test.com`
    - Password: `password123`
@@ -35,6 +52,7 @@ Then open your browser to: **http://127.0.0.1:5000**
 3. **Expected Result**: Redirected to home page, user is logged in
 
 ### 3. Browse Businesses (Initial State)
+
 1. Click "Browse Businesses" in the navbar
 2. **Expected Result**: Message "No businesses available yet"
 
@@ -43,6 +61,7 @@ Then open your browser to: **http://127.0.0.1:5000**
 ## Test Scenario 2: Business Owner Journey
 
 ### 1. Sign Up as Business Owner
+
 1. Open an **incognito/private browser window**
 2. Go to http://127.0.0.1:5000
 3. Click "Sign up"
@@ -57,6 +76,7 @@ Then open your browser to: **http://127.0.0.1:5000**
 7. **Expected Result**: Successfully logged in
 
 ### 2. Register a Business
+
 1. Click "Business Dashboard" in the navbar
 2. Click "Register New Business" button
 3. Fill in the form:
@@ -72,6 +92,7 @@ Then open your browser to: **http://127.0.0.1:5000**
    - Shows "1 active queue(s)"
 
 ### 3. View Business Dashboard
+
 1. On the Business Dashboard page
 2. **Expected Result**:
    - Your business "Joe's Café" is displayed
@@ -80,6 +101,7 @@ Then open your browser to: **http://127.0.0.1:5000**
    - "View Customer Feedback" button is visible
 
 ### 4. Manage a Queue
+
 1. Click "Main Queue" under your business
 2. **Expected Result**:
    - Page shows queue management interface
@@ -95,11 +117,13 @@ Then open your browser to: **http://127.0.0.1:5000**
 ## Test Scenario 3: Customer Joins Queue
 
 ### 1. Browse Businesses as Customer
+
 1. Switch back to customer browser window (john@test.com)
 2. Navigate to http://127.0.0.1:5000/businesses
 3. **Expected Result**: "Joe's Café" is now listed
 
 ### 2. View Business Queues
+
 1. Click "View Queues" on Joe's Café
 2. **Expected Result**:
    - Business details displayed (name, category, address)
@@ -111,6 +135,7 @@ Then open your browser to: **http://127.0.0.1:5000**
    - "Join Queue" button available
 
 ### 3. Join a Queue
+
 1. Click "Join Queue" button
 2. **Expected Result**:
    - Redirected to ticket page
@@ -126,6 +151,7 @@ Then open your browser to: **http://127.0.0.1:5000**
 ## Test Scenario 4: Business Serves Customer
 
 ### 1. View Customer in Queue
+
 1. Switch to business owner window (jane@business.com)
 2. Navigate to Business Dashboard → Joe's Café → Main Queue
 3. **Expected Result**:
@@ -139,6 +165,7 @@ Then open your browser to: **http://127.0.0.1:5000**
    - "Serve Next Customer" button is enabled
 
 ### 2. Serve the Customer
+
 1. Click "Serve Next Customer" button
 2. **Expected Result**:
    - Success message: "Next customer served successfully!"
@@ -153,6 +180,7 @@ Then open your browser to: **http://127.0.0.1:5000**
 ## Test Scenario 5: Queue History
 
 ### 1. View Personal Queue History
+
 1. Switch to customer window (john@test.com)
 2. Click "My History" in the navbar
 3. **Expected Result**:
@@ -170,6 +198,7 @@ Then open your browser to: **http://127.0.0.1:5000**
 ## Test Scenario 6: Multiple Customers in Queue
 
 ### 1. Create Additional Customer Accounts
+
 1. Open 3 new incognito windows
 2. Create accounts:
    - Email: `alice@test.com`, Password: `password123`
@@ -177,6 +206,7 @@ Then open your browser to: **http://127.0.0.1:5000**
    - Email: `charlie@test.com`, Password: `password123`
 
 ### 2. Have Multiple Customers Join Queue
+
 1. For each customer account:
    - Navigate to Browse Businesses → Joe's Café → View Queues
    - Click "Join Queue"
@@ -186,6 +216,7 @@ Then open your browser to: **http://127.0.0.1:5000**
    - Charlie gets Position #3
 
 ### 3. View Queue as Business Owner
+
 1. Switch to business owner window
 2. Go to Business Dashboard → Main Queue
 3. **Expected Result**:
@@ -195,6 +226,7 @@ Then open your browser to: **http://127.0.0.1:5000**
    - Customers listed in order: Alice, Bob, Charlie
 
 ### 4. Serve Multiple Customers
+
 1. Click "Serve Next Customer" 3 times (once for each customer)
 2. After each click, **Expected Result**:
    - Success message displayed
@@ -207,6 +239,7 @@ Then open your browser to: **http://127.0.0.1:5000**
 ## Test Scenario 7: Leave Queue Functionality
 
 ### 1. Join Queue and Leave
+
 1. As a customer (any account)
 2. Join Joe's Café → Main Queue
 3. Ensure you're NOT at position #1 (have another customer join first)
@@ -218,6 +251,7 @@ Then open your browser to: **http://127.0.0.1:5000**
    - Success message: "You have left the queue successfully"
 
 ### 2. Verify Queue Leave
+
 1. Check "My History"
 2. **Expected Result**: Most recent entry shows Status: Cancelled (red badge)
 
@@ -229,6 +263,7 @@ Then open your browser to: **http://127.0.0.1:5000**
 ## Test Scenario 8: Customer Feedback System
 
 ### 1. Submit Feedback
+
 1. As customer (john@test.com)
 2. Navigate to Browse Businesses → Joe's Café → View Queues
 3. Click "Leave Feedback" button
@@ -241,6 +276,7 @@ Then open your browser to: **http://127.0.0.1:5000**
    - Redirected to businesses list
 
 ### 2. Submit More Feedback (Different Ratings)
+
 1. Create/use different customer accounts
 2. Submit feedback with various ratings:
    - alice@test.com: Rating 4, Comment: "Good atmosphere"
@@ -248,6 +284,7 @@ Then open your browser to: **http://127.0.0.1:5000**
    - charlie@test.com: Rating 3, Comment: "Average experience"
 
 ### 3. View Feedback as Business Owner
+
 1. Switch to business owner (jane@business.com)
 2. Go to Business Dashboard
 3. Click "View Customer Feedback" under Joe's Café
@@ -265,6 +302,7 @@ Then open your browser to: **http://127.0.0.1:5000**
 ## Test Scenario 9: Alert Settings
 
 ### 1. Configure Alerts
+
 1. As customer in queue (any account)
 2. Navigate to your ticket page
 3. Scroll to "Alert Settings" section
@@ -278,6 +316,7 @@ Then open your browser to: **http://127.0.0.1:5000**
    - Green confirmation box appears: "Alert scheduled: when position ≤ 3"
 
 ### 2. Verify Alert Settings Persist
+
 1. Refresh the ticket page
 2. **Expected Result**:
    - Alert settings remain as configured
@@ -290,13 +329,16 @@ Then open your browser to: **http://127.0.0.1:5000**
 ## Test Scenario 10: Multiple Queues per Business
 
 ### 1. Add Additional Queues (Manual Setup)
+
 1. Stop the Flask server (Ctrl+C)
 2. Open Python shell:
+
 ```bash
 python
 ```
 
 3. Run this code:
+
 ```python
 import sqlite3
 conn = sqlite3.connect('users.db')
@@ -324,11 +366,13 @@ exit()
 ```
 
 4. Restart Flask server:
+
 ```bash
 python app.py
 ```
 
 ### 2. Test Multiple Queues as Business Owner
+
 1. Login as jane@business.com
 2. Go to Business Dashboard
 3. **Expected Result**:
@@ -337,6 +381,7 @@ python app.py
    - Each queue is clickable
 
 ### 3. Test Multiple Queues as Customer
+
 1. Login as john@test.com
 2. Navigate to Browse Businesses → Joe's Café → View Queues
 3. **Expected Result**:
@@ -348,6 +393,7 @@ python app.py
    - Can join any queue
 
 ### 4. Join Different Queues
+
 1. With different customer accounts, join different queues:
    - Alice → Main Queue
    - Bob → VIP Queue
@@ -362,28 +408,34 @@ python app.py
 ## Test Scenario 11: Edge Cases and Error Handling
 
 ### 1. Test Duplicate Email Registration
+
 1. Try to sign up with an existing email (e.g., john@test.com)
 2. **Expected Result**: Error message: "Email already registered"
 
 ### 2. Test Password Mismatch
+
 1. During signup, enter different passwords in Password and Confirm Password
 2. **Expected Result**: Error message: "Passwords do not match"
 
 ### 3. Test Invalid Login
+
 1. Try to login with wrong password
 2. **Expected Result**: Error message: "The email or password is incorrect"
 
 ### 4. Test Joining Queue While Already in Queue
+
 1. Join a queue as a customer
 2. Try to join another queue (or same queue again)
 3. **Expected Result**: Error message: "You are already in a queue. Leave your current queue first."
 
 ### 5. Test Accessing Business Dashboard Without Business
+
 1. Login as regular customer (john@test.com)
 2. Navigate to /business/dashboard
 3. **Expected Result**: Shows "You haven't registered any businesses yet"
 
 ### 6. Test Unauthorized Access
+
 1. As customer (john@test.com), try to access:
    - /business/1/queue/1 (another business's queue)
 2. **Expected Result**: Error message: "Unauthorized access" and redirect
@@ -393,11 +445,13 @@ python app.py
 ## Test Scenario 12: UI/UX Testing
 
 ### 1. Test Responsive Design
+
 1. Resize browser window to mobile size (375px width)
 2. Navigate through all pages
 3. **Expected Result**: All pages are readable and functional on mobile
 
 ### 2. Test Navigation Flow
+
 1. From home page, navigate through:
    - Browse Businesses → Business Queues → Join Queue → Ticket
    - My History
@@ -405,12 +459,14 @@ python app.py
 2. **Expected Result**: All links work, navigation is intuitive
 
 ### 3. Test Auto-Refresh
+
 1. As business owner, open Manage Queue page
 2. As customer (in different window), join the queue
 3. Wait 30 seconds on business owner's page
 4. **Expected Result**: Page auto-refreshes and shows new customer
 
 ### 4. Test Flash Messages
+
 1. Perform various actions (join queue, leave queue, register business, submit feedback)
 2. **Expected Result**:
    - Success messages appear in green
@@ -422,6 +478,7 @@ python app.py
 ## Test Scenario 13: Data Persistence
 
 ### 1. Test Database Persistence
+
 1. Perform several actions:
    - Register business
    - Join queue
@@ -469,6 +526,7 @@ Use this checklist for rapid testing:
 ## Performance Testing
 
 ### Test with High Load
+
 1. Create 20+ customer accounts
 2. Have all join the same queue
 3. As business owner, serve them one by one
@@ -493,7 +551,9 @@ While testing, watch for these potential issues:
 ## Test Data Summary
 
 ### Test Accounts Created
+
 - **Customers:**
+
   - john@test.com / password123
   - alice@test.com / password123
   - bob@test.com / password123
@@ -503,16 +563,18 @@ While testing, watch for these potential issues:
   - jane@business.com / business123
 
 ### Test Businesses
+
 - Joe's Café (Category: Café)
   - Main Queue (5 min service time)
-  - VIP Queue (3 min service time) - *if added manually*
-  - Takeout Queue (2 min service time) - *if added manually*
+  - VIP Queue (3 min service time) - _if added manually_
+  - Takeout Queue (2 min service time) - _if added manually_
 
 ---
 
 ## Troubleshooting
 
 ### If Flask won't start:
+
 ```bash
 # Check if port 5000 is in use
 netstat -ano | findstr :5000
@@ -522,6 +584,7 @@ python app.py
 ```
 
 ### If database errors occur:
+
 ```bash
 # Delete and recreate database
 rm users.db
@@ -530,6 +593,7 @@ python app.py
 ```
 
 ### If styles don't load:
+
 - Hard refresh browser: Ctrl+F5
 - Check browser console for errors
 - Verify Tailwind CDN is accessible
@@ -539,6 +603,7 @@ python app.py
 ## Success Criteria
 
 All tests pass if:
+
 1. ✅ All user flows complete without errors
 2. ✅ Data persists correctly in database
 3. ✅ UI is responsive and user-friendly
@@ -553,6 +618,7 @@ All tests pass if:
 ## Report Issues
 
 If you find bugs during testing, document:
+
 1. Steps to reproduce
 2. Expected behavior
 3. Actual behavior
@@ -561,9 +627,9 @@ If you find bugs during testing, document:
 
 ---
 
-**Testing completed on:** _____________
+**Testing completed on:** ******\_******
 
-**Tested by:** _____________
+**Tested by:** ******\_******
 
 **Overall Status:** [ ] Pass [ ] Fail
 
