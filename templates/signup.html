@@ -1,108 +1,293 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sign up – NexTurn</title>
-    <link rel="icon" href="{{ url_for('static', filename='logo.png') }}" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/feather-icons"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              primary: "#1800ad",
-              accent1: "#ff2e00",
-              accent2: "#ff9900",
-              accent3: "#ff75ca",
-            },
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign up – NexTurn</title>
+
+  <link rel="icon" href="{{ url_for('static', filename='logo.png') }}" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet"/>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#1800ad",
+            accent1: "#ff2e00",
+            accent2: "#ff9900",
           },
         },
-      };
-    </script>
-  </head>
-  <body class="min-h-screen flex items-center justify-center p-6 bg-gray-50">
-    <div class="w-full max-w-md p-8 bg-white shadow-lg rounded-2xl">
-      <div class="flex items-center justify-between mb-6">
-        <a href="{{ url_for('home') }}" class="flex items-center gap-2">
-          <img
-            src="{{ url_for('static', filename='logo.png') }}"
-            alt="NexTurn"
-            class="h-8 w-8"
-          />
-          <span class="text-xl font-bold text-gray-900">NexTurn</span>
-        </a>
-      </div>
+      },
+    }
+  </script>
 
-      <h1 class="text-2xl font-bold text-gray-900 mb-2">Create account</h1>
-      <p class="text-gray-600 mb-6">Join NexTurn to get started</p>
+  <style>
+    html, body { height: 100%; }
+    body {
+      font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, 'Helvetica Neue', Arial;
+      overflow: hidden;
+      position: relative;
+      background: linear-gradient(135deg, #1800ad, #ff9900);
+      transition: background 1s ease;
+    }
 
-      {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-          <div class="space-y-2 mb-4 mt-2">
-            {% for category, message in messages %}
-              <div class="rounded-lg px-4 py-3 text-sm {% if category=='success' %}bg-green-50 text-green-800 border border-green-200{% else %}bg-red-50 text-red-800 border border-red-200{% endif %}">
-                {{ message }}
-              </div>
-            {% endfor %}
-          </div>
-        {% endif %}
-      {% endwith %}
+    /* --- Animated "NexTurn" watermark --- */
+    .marquee {
+      position: fixed; inset: 0;
+      pointer-events: none;
+      opacity: 0.08;
+      overflow: hidden;
+      z-index: 0;
+    }
+    .marquee__inner {
+      position: absolute;
+      left: -5%; right: -5%; top: 10%;
+      display: flex; gap: 4rem; white-space: nowrap;
+      will-change: transform;
+      animation: marquee 30s linear infinite;
+    }
+    .marquee--reverse .marquee__inner {
+      top: auto; bottom: 12%;
+      animation-direction: reverse;
+    }
+    .marquee__row {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800; letter-spacing: 0.08em;
+      font-size: clamp(3.5rem, 10vw, 12rem);
+      line-height: 1;
+      -webkit-text-stroke: 2px rgba(255,255,255,0.6);
+      color: transparent;
+      text-shadow: 0 0 30px rgba(255,255,255,0.25);
+      user-select: none;
+    }
+    .marquee__row span {
+      display: inline-block;
+      background: linear-gradient(90deg, rgba(255,255,255,0.85), rgba(255,255,255,0.45));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      filter: drop-shadow(0 2px 12px rgba(0,0,0,0.35));
+      margin-right: 2.5rem;
+    }
+    @keyframes marquee { to { transform: translateX(-50%); } }
 
-      <form class="space-y-5" method="POST" action="{{ url_for('signup') }}">
-        <input
-          type="text"
-          name="fullname"
-          placeholder="Full Name"
-          class="w-full px-4 py-3 border rounded-lg focus:ring-accent2 focus:border-accent2"
-          required
-        />
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          class="w-full px-4 py-3 border rounded-lg focus:ring-accent2 focus:border-accent2"
-          required
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          class="w-full px-4 py-3 border rounded-lg focus:ring-accent2 focus:border-accent2"
-          required
-        />
-        <input
-          type="password"
-          name="confirm_password"
-          placeholder="Confirm Password"
-          class="w-full px-4 py-3 border rounded-lg focus:ring-accent2 focus:border-accent2"
-          required
-        />
-        <input
-          type="text"
-          name="organization"
-          placeholder="Organization"
-          class="w-full px-4 py-3 border rounded-lg focus:ring-accent2 focus:border-accent2"
-        />
-        <button
-          type="submit"
-          class="w-full bg-primary hover:bg-accent1 text-white font-semibold py-3 rounded-lg"
-        >
-          Create account
-        </button>
-      </form>
+    /* --- Floating bubbles --- */
+    .bg-bubbles {
+      position: fixed; inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .bg-bubbles li {
+      position: absolute;
+      list-style: none;
+      display: block;
+      width: 34px;
+      height: 34px;
+      border-radius: 9999px;
+      background: rgba(255,255,255,0.12);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.25) inset;
+      bottom: -160px;
+      animation: floatUp 22s linear infinite;
+      transform: translateZ(0);
+    }
+    @keyframes floatUp {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(-1100px) rotate(720deg); opacity: 0; }
+    }
 
-      <div class="mt-6 text-center">
-        <p class="text-sm text-gray-600">
-          Already have an account?
-          <a
-            href="{{ url_for('login') }}"
-            class="text-accent2 hover:text-primary font-medium"
-            >Log in</a
-          >
-        </p>
+    /* Glassy card */
+    .glass {
+      backdrop-filter: blur(10px) saturate(1.1);
+      -webkit-backdrop-filter: blur(10px) saturate(1.1);
+    }
+
+    /* Accent shuffle button */
+    .floating-controls {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 20;
+    }
+
+    .scrim {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: -1;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen relative">
+
+  <!-- Overlay -->
+  <div class="scrim"></div>
+
+  <!-- Animated NexTurn watermark -->
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee__inner">
+      <div class="marquee__row">
+        <span>NexTurn</span><span>NexTurn</span><span>NexTurn</span>
+        <span>NexTurn</span><span>NexTurn</span><span>NexTurn</span>
       </div>
     </div>
-  </body>
+  </div>
+  <div class="marquee marquee--reverse" aria-hidden="true">
+    <div class="marquee__inner">
+      <div class="marquee__row">
+        <span>NexTurn</span><span>NexTurn</span><span>NexTurn</span>
+        <span>NexTurn</span><span>NexTurn</span><span>NexTurn</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating bubbles -->
+  <ul class="bg-bubbles" aria-hidden="true">
+    <li></li><li></li><li></li><li></li><li></li>
+    <li></li><li></li><li></li><li></li><li></li>
+  </ul>
+
+  <!-- Accent Shuffle Button -->
+  <div class="floating-controls">
+    <button id="accentBtn" class="glass rounded-xl shadow-lg px-3 py-2 text-xs font-medium text-white/90 bg-white/10 hover:bg-white/20 transition flex items-center gap-2">
+      <i data-feather="aperture"></i><span>Accent Shuffle</span>
+    </button>
+  </div>
+
+  <!-- Signup Card -->
+  <div class="container mx-auto px-6 py-24 flex items-center justify-center relative z-10">
+    <div class="w-full max-w-md bg-white/90 glass rounded-2xl shadow-2xl overflow-hidden border border-white/20">
+      <div class="p-8">
+        <div class="flex items-center justify-between mb-6">
+          <a href="{{ url_for('home') }}" class="flex items-center gap-2">
+            <img
+              src="{{ url_for('static', filename='logo.png') }}"
+              alt="NexTurn"
+              class="h-8 w-8"
+            />
+            <span class="text-xl font-bold text-gray-900">NexTurn</span>
+          </a>
+        </div>
+
+        <h1 class="text-2xl font-bold text-gray-900 mb-2">Create account</h1>
+        <p class="text-gray-600 mb-6">Join NexTurn to get started</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="space-y-2 mb-4 mt-2">
+              {% for category, message in messages %}
+                <div class="rounded-lg px-4 py-3 text-sm {% if category=='success' %}bg-green-50 text-green-800 border border-green-200{% else %}bg-red-50 text-red-800 border border-red-200{% endif %}">
+                  {{ message }}
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <form class="space-y-5" method="POST" action="{{ url_for('signup') }}">
+          <input
+            type="text"
+            name="fullname"
+            placeholder="Full Name"
+            class="w-full px-4 py-3 border rounded-lg focus:ring-accent2 focus:border-accent2"
+            required
+          />
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            class="w-full px-4 py-3 border rounded-lg focus:ring-accent2 focus:border-accent2"
+            required
+          />
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            class="w-full px-4 py-3 border rounded-lg focus:ring-accent2 focus:border-accent2"
+            required
+          />
+          <input
+            type="password"
+            name="confirm_password"
+            placeholder="Confirm Password"
+            class="w-full px-4 py-3 border rounded-lg focus:ring-accent2 focus:border-accent2"
+            required
+          />
+          <input
+            type="text"
+            name="organization"
+            placeholder="Organization"
+            class="w-full px-4 py-3 border rounded-lg focus:ring-accent2 focus:border-accent2"
+          />
+          <button
+            type="submit"
+            id="submitBtn"
+            class="w-full text-white font-semibold py-3 rounded-lg"
+            style="background: linear-gradient(90deg, #1800ad, #ff9900);"
+          >
+            Create account
+          </button>
+        </form>
+
+        <div class="mt-6 text-center">
+          <p class="text-sm text-gray-600">
+            Already have an account?
+            <a
+              href="{{ url_for('login') }}"
+              class="text-accent2 hover:text-primary font-medium"
+              >Log in</a
+            >
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    feather.replace();
+
+    // Randomize bubbles
+    document.querySelectorAll('.bg-bubbles li').forEach((b, i) => {
+      b.style.left = `${Math.random() * 100}%`;
+      const size = 24 + Math.random() * 44;
+      b.style.width = `${size}px`;
+      b.style.height = `${size}px`;
+      b.style.animationDelay = `${i * 1.1}s`;
+      b.style.animationDuration = `${18 + Math.random() * 20}s`;
+      b.style.opacity = `${0.06 + Math.random() * 0.2}`;
+    });
+
+    // Subtle parallax
+    window.addEventListener('mousemove', (e) => {
+      const { innerWidth: w, innerHeight: h } = window;
+      const dx = (e.clientX - w/2) / w;
+      const dy = (e.clientY - h/2) / h;
+      document.querySelectorAll('.bg-bubbles li').forEach((b, i) => {
+        const strength = (i % 5 + 1) * 2;
+        b.style.transform = `translate(${dx * strength}px, ${dy * strength}px)`;
+      });
+    });
+
+    // Accent shuffle
+    const accentBtn = document.getElementById('accentBtn');
+    const accents = [
+      { from:'#1800ad', to:'#ff9900' },
+      { from:'#4f46e5', to:'#a855f7' },
+      { from:'#06b6d4', to:'#6366f1' },
+      { from:'#22c55e', to:'#0ea5e9' },
+      { from:'#f97316', to:'#ef4444' },
+      { from:'#e11d48', to:'#7c3aed' },
+    ];
+
+    accentBtn.addEventListener('click', () => {
+      const a = accents[Math.floor(Math.random() * accents.length)];
+      document.body.style.background = `linear-gradient(135deg, ${a.from}, ${a.to})`;
+      document.getElementById('submitBtn').style.background = `linear-gradient(90deg, ${a.from}, ${a.to})`;
+    });
+  </script>
+</body>
 </html>
