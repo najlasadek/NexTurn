@@ -1,25 +1,52 @@
+"""
+Feedback Service - Main Application
+"""
 from flask import Flask
 from flask_cors import CORS
-from config.config import Config
-from db.init_db import init_db
+import os
+import sys
 
-def create_app():
-    app = Flask(__name__)
-    app.config.from_object(Config)
-    CORS(app)
+# Add parent directory to path for imports (same trick as business-service)
+sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
 
-    # Register routes
-    from app.routes import feedback_bp
-    app.register_blueprint(feedback_bp, url_prefix="/feedback")
+from models import Feedback
+from routes import init_routes
+from db.init_db import init_database
 
-    # Initialize DB
-    with app.app_context():
-        init_db()
+# Configuration
+DB_PATH = os.path.join(os.path.dirname(__file__), '../db/feedback.db')
+PORT = int(os.getenv('FEEDBACK_SERVICE_PORT', 5005))
 
-    return app
+# Initialize Flask app
+app = Flask(__name__)
+CORS(app)
 
+# Initialize database
+init_database(DB_PATH)
 
-app = create_app()
+# Initialize Feedback model
+feedback_model = Feedback(DB_PATH)
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5005, debug=True)
+# Register routes
+feedback_routes = init_routes(feedback_model)
+app.register_blueprint(feedback_routes, url_prefix='/')
+
+@app.route('/')
+def index():
+    """Root endpoint"""
+    return {
+        'service': 'Feedback Service',
+        'version': '1.0.0',
+        'status': 'running',
+        'endpoints': {
+            'health': '/health',
+            'submit_feedback': '/feedback [POST]',
+            'list_feedback_for_business': '/feedback/business/<id> [GET]',
+            'get_feedback': '/feedback/<id> [GET]',
+            'average_rating': '/feedback/business/<id>/average [GET]',
+        }
+    }
+
+if __name__ == '__main__':
+    print(f"⭐ Feedback Service starting on port {PORT}...")
+    app.run(host='0.0.0.0', port=PORT, debug=True)
