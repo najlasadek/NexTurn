@@ -1,10 +1,6 @@
 import sqlite3
 
 class Feedback:
-    """
-    Feedback model: wraps all DB operations for feedback-service.
-    """
-
     def __init__(self, db_path: str):
         self.db_path = db_path
 
@@ -16,21 +12,18 @@ class Feedback:
     def create_feedback(self, user_id: int, business_id: int, rating: int, comment: str = ""):
         conn = self._get_connection()
         cur = conn.cursor()
-
         cur.execute(
             """
             INSERT INTO feedback (user_id, business_id, rating, comment)
             VALUES (?, ?, ?, ?)
             """,
-            (user_id, business_id, rating, comment),
+            (user_id, business_id, rating, comment)
         )
         conn.commit()
         new_id = cur.lastrowid
-
         cur.execute("SELECT * FROM feedback WHERE id = ?", (new_id,))
         row = cur.fetchone()
         conn.close()
-
         return dict(row) if row else None
 
     def get_feedback_by_id(self, feedback_id: int):
@@ -50,7 +43,7 @@ class Feedback:
             WHERE business_id = ?
             ORDER BY created_at DESC
             """,
-            (business_id,),
+            (business_id,)
         )
         rows = cur.fetchall()
         conn.close()
@@ -65,16 +58,12 @@ class Feedback:
             FROM feedback
             WHERE business_id = ?
             """,
-            (business_id,),
+            (business_id,)
         )
         row = cur.fetchone()
         conn.close()
-
-        avg = row["avg_rating"] if row and row["avg_rating"] is not None else None
-        count = row["count"] if row else 0
-
         return {
             "business_id": business_id,
-            "average_rating": float(avg) if avg is not None else None,
-            "count": int(count),
+            "average_rating": float(row["avg_rating"]) if row["avg_rating"] is not None else None,
+            "count": int(row["count"])
         }
