@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nexturn-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: nexturn.local
+    http:
+      paths:
+      - path: /auth
+        pathType: Prefix
+        backend:
+          service:
+            name: auth-service
+            port:
+              number: 5001
+      - path: /business
+        pathType: Prefix
+        backend:
+          service:
+            name: business-service
+            port:
+              number: 5002
+      - path: /queue
+        pathType: Prefix
+        backend:
+          service:
+            name: queue-service
+            port:
+              number: 5003

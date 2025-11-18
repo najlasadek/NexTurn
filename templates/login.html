@@ -188,6 +188,7 @@
           <input
             type="email"
             name="email"
+            id="email"
             placeholder="Email"
             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent2 focus:border-transparent"
             required
@@ -195,10 +196,12 @@
           <input
             type="password"
             name="password"
+            id="password"
             placeholder="Password"
             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent2 focus:border-transparent"
             required
           />
+          <div id="errorMsg" class="hidden rounded-lg px-4 py-3 text-sm bg-red-50 text-red-800 border border-red-200"></div>
           <button
             type="submit"
             id="submitBtn"
@@ -260,6 +263,54 @@
       const a = accents[Math.floor(Math.random() * accents.length)];
       document.body.style.background = `linear-gradient(135deg, ${a.from}, ${a.to})`;
       document.getElementById('submitBtn').style.background = `linear-gradient(90deg, ${a.from}, ${a.to})`;
+    });
+
+    // Handle form submission
+    const loginForm = document.getElementById('loginForm');
+    const errorMsg = document.getElementById('errorMsg');
+    const submitBtn = document.getElementById('submitBtn');
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorMsg.classList.add('hidden');
+
+      const formData = {
+        email: document.getElementById('email').value,
+        password: document.getElementById('password').value
+      };
+
+      submitBtn.disabled = true;
+      submitBtn.querySelector('span').textContent = 'Logging in...';
+
+      try {
+        const response = await fetch('{{ url_for("login") }}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData)
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // Success! Store token and redirect to dashboard
+          localStorage.setItem('token', data.data.token);
+          localStorage.setItem('user', JSON.stringify(data.data.user));
+          window.location.href = '{{ url_for("business_dashboard") }}';
+        } else {
+          // Show error
+          errorMsg.textContent = data.message || 'Login failed';
+          errorMsg.classList.remove('hidden');
+          submitBtn.disabled = false;
+          submitBtn.querySelector('span').textContent = 'Log In';
+        }
+      } catch (error) {
+        errorMsg.textContent = 'An error occurred. Please try again.';
+        errorMsg.classList.remove('hidden');
+        submitBtn.disabled = false;
+        submitBtn.querySelector('span').textContent = 'Log In';
+      }
     });
   </script>
 </body>

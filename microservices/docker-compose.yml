@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  frontend-service:
+    build:
+      context: ..
+      dockerfile: microservices/frontend-service/Dockerfile
+    container_name: frontend-service
+    ports:
+      - "5000:5000"
+    environment:
+      - FRONTEND_SERVICE_PORT=5000
+      - AUTH_SERVICE_URL=http://auth-service:5001
+      - BUSINESS_SERVICE_URL=http://business-service:5002
+      - QUEUE_SERVICE_URL=http://queue-service:5003
+      - SECRET_KEY=your-secret-key-change-in-production
+    networks:
+      - microservices-network
+    depends_on:
+      - auth-service
+      - business-service
+      - queue-service
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: auth-service/Dockerfile
+    container_name: auth-service
+    ports:
+      - "5001:5001"
+    environment:
+      - AUTH_SERVICE_PORT=5001
+      - JWT_SECRET_KEY=your-secret-key-change-in-production
+      - PYTHONPATH=/app:/app/shared
+    volumes:
+      - ./auth-service/db:/app/db
+      - ./shared:/app/shared
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/auth/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  business-service:
+    build:
+      context: .
+      dockerfile: business-service/Dockerfile
+    container_name: business-service
+    ports:
+      - "5002:5002"
+    environment:
+      - BUSINESS_SERVICE_PORT=5002
+      - QUEUE_SERVICE_URL=http://queue-service:5003
+      - PYTHONPATH=/app:/app/shared
+    volumes:
+      - ./business-service/db:/app/db
+      - ./shared:/app/shared
+    networks:
+      - microservices-network
+    depends_on:
+      - queue-service
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5002/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  queue-service:
+    build:
+      context: .
+      dockerfile: queue-service/Dockerfile
+    container_name: queue-service
+    ports:
+      - "5003:5003"
+    environment:
+      - QUEUE_SERVICE_PORT=5003
+      - PYTHONPATH=/app:/app/shared
+    volumes:
+      - ./queue-service/db:/app/db
+      - ./shared:/app/shared
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5003/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  microservices-network:
+    driver: bridge
