@@ -1,17 +1,13 @@
-FROM python:3.11-slim
+FROM python:3.9-slim
 
 WORKDIR /app
 
-# Copy ONLY this service's requirements from the correct folder
 COPY feedback-service/requirements.txt .
-
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy shared utilities
-COPY shared/ /app/shared/
+COPY feedback-service/ /app
 
-# Copy this service's code into /app
-COPY feedback-service/ ./
+ENV PYTHONPATH=/app
 
 EXPOSE 5005
 
