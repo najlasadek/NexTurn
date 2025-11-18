@@ -1,58 +1,55 @@
-from flask import Blueprint, request
-from shared.database import db
-from shared.response import success, fail
-from shared.auth_middleware import token_required
-from app.models import Feedback
+from flask import Blueprint, request, jsonify
 
-feedback_bp = Blueprint("feedback", __name__)
+def init_routes(feedback_model):
+    """
+    Creates a Blueprint with all feedback-service routes wired to the Feedback model.
+    """
+    feedback_bp = Blueprint("feedback_bp", __name__)
 
-# POST /feedback
-@feedback_bp.route("/", methods=["POST"])
-@token_required
-def submit_feedback(current_user):
-    data = request.get_json()
+    @feedback_bp.route("/health", methods=["GET"])
+    def health():
+        return jsonify({"status": "ok", "service": "feedback-service"}), 200
 
-    required = ["user_id", "business_id", "rating"]
-    if not all(k in data for k in required):
-        return fail("Missing fields: user_id, business_id, rating", 400)
+    # POST /feedback  – submit new feedback
+    @feedback_bp.route("/feedback", methods=["POST"])
+    def submit_feedback():
+        data = request.get_json() or {}
 
-    fb = Feedback(
-        user_id=data["user_id"],
-        business_id=data["business_id"],
-        rating=data["rating"],
-        comment=data.get("comment", "")
-    )
+        user_id = data.get("user_id")
+        business_id = data.get("business_id")
+        rating = data.get("rating")
+        comment = data.get("comment", "")
 
-    db.session.add(fb)
-    db.session.commit()
-    return success(fb.to_dict(), 201)
+        if user_id is None or business_id is None or rating is None:
+            return jsonify({"error": "user_id, business_id, and rating are required"}), 400
 
+        fb = feedback_model.create_feedback(
+            user_id=int(user_id),
+            business_id=int(business_id),
+            rating=int(rating),
+            comment=comment,
+        )
 
-# GET /feedback/business/<businessId>
-@feedback_bp.route("/business/<int:business_id>", methods=["GET"])
-def get_business_feedback(business_id):
-    feedback_list = Feedback.query.filter_by(business_id=business_id).all()
-    return success([f.to_dict() for f in feedback_list])
+        return jsonify(fb), 201
 
+    # GET /feedback/business/<businessId> – list feedback for a business
+    @feedback_bp.route("/feedback/business/<int:business_id>", methods=["GET"])
+    def list_business_feedback(business_id):
+        feedback_list = feedback_model.get_feedback_for_business(business_id)
+        return jsonify({"feedback": feedback_list}), 200
 
-# GET /feedback/<id>
-@feedback_bp.route("/<int:feedback_id>", methods=["GET"])
-def get_feedback(feedback_id):
-    fb = Feedback.query.get(feedback_id)
-    if not fb:
-        return fail("Feedback not found", 404)
-    return success(fb.to_dict())
+    # GET /feedback/<id> – get one feedback
+    @feedback_bp.route("/feedback/<int:feedback_id>", methods=["GET"])
+    def get_feedback(feedback_id):
+        fb = feedback_model.get_feedback_by_id(feedback_id)
+        if not fb:
+            return jsonify({"error": "Feedback not found"}), 404
+        return jsonify(fb), 200
 
+    # GET /feedback/business/<id>/average – average rating
+    @feedback_bp.route("/feedback/business/<int:business_id>/average", methods=["GET"])
+    def average_feedback(business_id):
+        stats = feedback_model.get_average_rating_for_business(business_id)
+        return jsonify(stats), 200
 
-# GET /feedback/business/<id>/average
-@feedback_bp.route("/business/<int:business_id>/average", methods=["GET"])
-def get_average_rating(business_id):
-    from sqlalchemy import func
-    avg = db.session.query(func.avg(Feedback.rating)).filter_by(business_id=business_id).scalar()
-    count = Feedback.query.filter_by(business_id=business_id).count()
-
-    return success({
-        "business_id": business_id,
-        "average_rating": float(avg) if avg else None,
-        "count": count
-    })
+    return feedback_bp
