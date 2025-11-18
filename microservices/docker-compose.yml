@@ -92,6 +92,28 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+  
+feedback-service:
+    build:
+      context: .
+      dockerfile: feedback-service/Dockerfile
+    container_name: feedback-service
+    ports:
+      - "5005:5005"
+    environment:
+      - FEEDBACK_SERVICE_PORT=5005
+      - PYTHONPATH=/app:/app/shared
+    volumes:
+      - ./feedback-service/db:/app/db
+      - ./shared:/app/shared
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5005/feedback/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
 
 networks:
   microservices-network:
