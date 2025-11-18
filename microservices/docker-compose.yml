@@ -93,7 +93,7 @@ services:
       timeout: 10s
       retries: 3
   
-feedback-service:
+  feedback-service:
     build:
       context: .
       dockerfile: feedback-service/Dockerfile
@@ -114,6 +114,9 @@ feedback-service:
       timeout: 10s
       retries: 3
 
+
+
+
   ticket-service:
     build:
       context: .
@@ -123,18 +126,18 @@ feedback-service:
       - "5004:5004"
     environment:
       - TICKET_SERVICE_PORT=5004
-      - PYTHONPATH=/app:/app/shared
+      - PYTHONPATH=/app
     volumes:
       - ./ticket-service/db:/app/db
-      - ./shared:/app/shared
     networks:
       - microservices-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5004/api/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:5004/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-analytics-service:
+
+  analytics-service:
     build:
       context: .
       dockerfile: analytics-service/Dockerfile
@@ -173,6 +176,7 @@ analytics-service:
       interval: 30s
       timeout: 10s
       retries: 3
+  
 networks:
   microservices-network:
     driver: bridge
