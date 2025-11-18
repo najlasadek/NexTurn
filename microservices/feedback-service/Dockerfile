@@ -2,15 +2,17 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY requirements.txt .
+# Copy ONLY this service's requirements from the correct folder
+COPY feedback-service/requirements.txt .
+
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+# Copy shared utilities
+COPY shared/ /app/shared/
 
-ENV FLASK_APP=app/app.py
-ENV FLASK_RUN_HOST=0.0.0.0
-ENV FLASK_RUN_PORT=5005
+# Copy this service's code into /app
+COPY feedback-service/ ./
 
 EXPOSE 5005
 
-CMD ["flask", "run"]
+CMD ["python", "app/app.py"]
