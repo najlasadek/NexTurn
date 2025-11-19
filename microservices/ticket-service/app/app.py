@@ -10,7 +10,7 @@ from models import TicketHistory
 from routes import init_routes
 from db.init_db import init_database
 
-DB_PATH = os.path.join(os.path.dirname(__file__), '../db/ticket.db')
+DB_PATH = os.getenv('DB_PATH', os.path.join(os.path.dirname(__file__), '../db/ticket.db'))
 PORT = int(os.getenv('TICKET_SERVICE_PORT', 5004))
 
 app = Flask(__name__)

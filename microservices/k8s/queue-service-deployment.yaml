@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: queue-service
+  namespace: nexturn
   labels:
     app: queue-service
 spec:
@@ -23,11 +24,13 @@ spec:
         env:
         - name: QUEUE_SERVICE_PORT
           value: "5003"
+        - name: PYTHONPATH
+          value: "/app:/app/shared"
+        - name: DB_PATH
+          value: "/app/data/queue.db"
         volumeMounts:
         - name: queue-db
-          mountPath: /app/db
-        - name: shared-code
-          mountPath: /app/shared
+          mountPath: /app/data
         resources:
           requests:
             memory: "128Mi"
@@ -51,15 +54,12 @@ spec:
       - name: queue-db
         persistentVolumeClaim:
           claimName: queue-db-pvc
-      - name: shared-code
-        hostPath:
-          path: /data/shared
-          type: DirectoryOrCreate
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: queue-service
+  namespace: nexturn
 spec:
   selector:
     app: queue-service
@@ -73,6 +73,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: queue-db-pvc
+  namespace: nexturn
 spec:
   accessModes:
     - ReadWriteOnce

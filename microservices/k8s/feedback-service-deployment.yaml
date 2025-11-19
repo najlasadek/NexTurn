@@ -1,37 +1,35 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auth-service
+  name: feedback-service
   namespace: nexturn
   labels:
-    app: auth-service
+    app: feedback-service
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
-      app: auth-service
+      app: feedback-service
   template:
     metadata:
       labels:
-        app: auth-service
+        app: feedback-service
     spec:
       containers:
-      - name: auth-service
-        image: auth-service:latest
+      - name: feedback-service
+        image: feedback-service:latest
         imagePullPolicy: Never
         ports:
-        - containerPort: 5001
+        - containerPort: 5005
         env:
-        - name: AUTH_SERVICE_PORT
-          value: "5001"
-        - name: JWT_SECRET_KEY
-          value: "your-secret-key-change-in-production"
+        - name: FEEDBACK_SERVICE_PORT
+          value: "5005"
         - name: PYTHONPATH
-          value: "/app:/app/shared"
+          value: "/app"
         - name: DB_PATH
-          value: "/app/data/auth.db"
+          value: "/app/data/feedback.db"
         volumeMounts:
-        - name: auth-db
+        - name: feedback-db
           mountPath: /app/data
         resources:
           requests:
@@ -42,39 +40,39 @@ spec:
             cpu: "200m"
         livenessProbe:
           httpGet:
-            path: /auth/health
-            port: 5001
+            path: /health
+            port: 5005
           initialDelaySeconds: 30
           periodSeconds: 10
         readinessProbe:
           httpGet:
-            path: /auth/health
-            port: 5001
+            path: /health
+            port: 5005
           initialDelaySeconds: 5
           periodSeconds: 5
       volumes:
-      - name: auth-db
+      - name: feedback-db
         persistentVolumeClaim:
-          claimName: auth-db-pvc
+          claimName: feedback-db-pvc
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: auth-service
+  name: feedback-service
   namespace: nexturn
 spec:
   selector:
-    app: auth-service
+    app: feedback-service
   ports:
     - protocol: TCP
-      port: 5001
-      targetPort: 5001
+      port: 5005
+      targetPort: 5005
   type: ClusterIP
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: auth-db-pvc
+  name: feedback-db-pvc
   namespace: nexturn
 spec:
   accessModes:
@@ -82,3 +80,4 @@ spec:
   resources:
     requests:
       storage: 1Gi
+

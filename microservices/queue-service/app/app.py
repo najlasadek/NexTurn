@@ -14,7 +14,7 @@ from routes import init_routes
 from db.init_db import init_database
 
 # Configuration
-DB_PATH = os.path.join(os.path.dirname(__file__), '../db/queue.db')
+DB_PATH = os.getenv('DB_PATH', os.path.join(os.path.dirname(__file__), '../db/queue.db'))
 PORT = int(os.getenv('QUEUE_SERVICE_PORT', 5003))
 
 # Initialize Flask app

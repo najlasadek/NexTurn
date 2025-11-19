@@ -1,37 +1,35 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auth-service
+  name: ticket-service
   namespace: nexturn
   labels:
-    app: auth-service
+    app: ticket-service
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
-      app: auth-service
+      app: ticket-service
   template:
     metadata:
       labels:
-        app: auth-service
+        app: ticket-service
     spec:
       containers:
-      - name: auth-service
-        image: auth-service:latest
+      - name: ticket-service
+        image: ticket-service:latest
         imagePullPolicy: Never
         ports:
-        - containerPort: 5001
+        - containerPort: 5004
         env:
-        - name: AUTH_SERVICE_PORT
-          value: "5001"
-        - name: JWT_SECRET_KEY
-          value: "your-secret-key-change-in-production"
+        - name: TICKET_SERVICE_PORT
+          value: "5004"
         - name: PYTHONPATH
-          value: "/app:/app/shared"
+          value: "/app"
         - name: DB_PATH
-          value: "/app/data/auth.db"
+          value: "/app/data/ticket.db"
         volumeMounts:
-        - name: auth-db
+        - name: ticket-db
           mountPath: /app/data
         resources:
           requests:
@@ -42,39 +40,39 @@ spec:
             cpu: "200m"
         livenessProbe:
           httpGet:
-            path: /auth/health
-            port: 5001
+            path: /health
+            port: 5004
           initialDelaySeconds: 30
           periodSeconds: 10
         readinessProbe:
           httpGet:
-            path: /auth/health
-            port: 5001
+            path: /health
+            port: 5004
           initialDelaySeconds: 5
           periodSeconds: 5
       volumes:
-      - name: auth-db
+      - name: ticket-db
         persistentVolumeClaim:
-          claimName: auth-db-pvc
+          claimName: ticket-db-pvc
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: auth-service
+  name: ticket-service
   namespace: nexturn
 spec:
   selector:
-    app: auth-service
+    app: ticket-service
   ports:
     - protocol: TCP
-      port: 5001
-      targetPort: 5001
+      port: 5004
+      targetPort: 5004
   type: ClusterIP
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: auth-db-pvc
+  name: ticket-db-pvc
   namespace: nexturn
 spec:
   accessModes:
@@ -82,3 +80,4 @@ spec:
   resources:
     requests:
       storage: 1Gi
+

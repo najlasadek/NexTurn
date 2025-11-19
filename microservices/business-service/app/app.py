@@ -14,7 +14,7 @@ from routes import init_routes
 from db.init_db import init_database
 
 # Configuration
-DB_PATH = os.path.join(os.path.dirname(__file__), '../db/business.db')
+DB_PATH = os.getenv('DB_PATH', os.path.join(os.path.dirname(__file__), '../db/business.db'))
 PORT = int(os.getenv('BUSINESS_SERVICE_PORT', 5002))
 QUEUE_SERVICE_URL = os.getenv('QUEUE_SERVICE_URL', 'http://localhost:5003')
 

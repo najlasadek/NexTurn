@@ -9,7 +9,7 @@ from models import NotificationStore
 from routes import init_routes
 from db.init_db import init_database
 
-DB_PATH = os.path.join(os.path.dirname(__file__), '../db/notifications.db')
+DB_PATH = os.getenv('DB_PATH', os.path.join(os.path.dirname(__file__), '../db/notifications.db'))
 PORT = int(os.getenv('NOTIFICATION_SERVICE_PORT', 5007))
 
 app = Flask(__name__)

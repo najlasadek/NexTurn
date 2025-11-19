@@ -109,9 +109,10 @@ Once running, access services at:
 3. ✅ Understand how services communicate
 
 ### **Day 4: Deploy to Kubernetes**
-1. ✅ Run `./deploy.sh` and select Kubernetes option
-2. ✅ Explore Kubernetes deployments
-3. ✅ Scale services with `kubectl scale`
+1. ✅ Read [MINIKUBE_DEPLOYMENT.md](MINIKUBE_DEPLOYMENT.md) for detailed guide
+2. ✅ Run `./deploy-minikube.sh` (Linux/Mac) or `.\deploy-minikube.ps1` (Windows)
+3. ✅ Explore Kubernetes deployments
+4. ✅ Scale services with `kubectl scale`
 
 ---
 

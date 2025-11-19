@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: business-service
+  namespace: nexturn
   labels:
     app: business-service
 spec:
@@ -25,11 +26,13 @@ spec:
           value: "5002"
         - name: QUEUE_SERVICE_URL
           value: "http://queue-service:5003"
+        - name: PYTHONPATH
+          value: "/app:/app/shared"
+        - name: DB_PATH
+          value: "/app/data/business.db"
         volumeMounts:
         - name: business-db
-          mountPath: /app/db
-        - name: shared-code
-          mountPath: /app/shared
+          mountPath: /app/data
         resources:
           requests:
             memory: "128Mi"
@@ -53,15 +56,12 @@ spec:
       - name: business-db
         persistentVolumeClaim:
           claimName: business-db-pvc
-      - name: shared-code
-        hostPath:
-          path: /data/shared
-          type: DirectoryOrCreate
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: business-service
+  namespace: nexturn
 spec:
   selector:
     app: business-service
@@ -75,6 +75,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: business-db-pvc
+  namespace: nexturn
 spec:
   accessModes:
     - ReadWriteOnce

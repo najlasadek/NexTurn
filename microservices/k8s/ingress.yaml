@@ -2,6 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: nexturn-ingress
+  namespace: nexturn
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
@@ -9,6 +10,13 @@ spec:
   - host: nexturn.local
     http:
       paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-service
+            port:
+              number: 5000
       - path: /auth
         pathType: Prefix
         backend:
@@ -16,17 +24,45 @@ spec:
             name: auth-service
             port:
               number: 5001
-      - path: /business
+      - path: /api/business
         pathType: Prefix
         backend:
           service:
             name: business-service
             port:
               number: 5002
-      - path: /queue
+      - path: /api/queue
         pathType: Prefix
         backend:
           service:
             name: queue-service
             port:
               number: 5003
+      - path: /api/ticket
+        pathType: Prefix
+        backend:
+          service:
+            name: ticket-service
+            port:
+              number: 5004
+      - path: /api/feedback
+        pathType: Prefix
+        backend:
+          service:
+            name: feedback-service
+            port:
+              number: 5005
+      - path: /api/analytics
+        pathType: Prefix
+        backend:
+          service:
+            name: analytics-service
+            port:
+              number: 5006
+      - path: /api/notification
+        pathType: Prefix
+        backend:
+          service:
+            name: notification-service
+            port:
+              number: 5007

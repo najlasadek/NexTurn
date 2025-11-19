@@ -14,7 +14,7 @@ from routes import init_routes
 from db.init_db import init_database
 
 # Configuration
-DB_PATH = os.path.join(os.path.dirname(__file__), '../db/auth.db')
+DB_PATH = os.getenv('DB_PATH', os.path.join(os.path.dirname(__file__), '../db/auth.db'))
 PORT = int(os.getenv('AUTH_SERVICE_PORT', 5001))
 
 # Initialize Flask app
