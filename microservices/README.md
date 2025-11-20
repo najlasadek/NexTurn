@@ -418,12 +418,16 @@ Each implemented microservice now ships with its own declarative Jenkins pipelin
 
 ### Pipeline files
 
-| Service | Jenkinsfile path |
-|---------|------------------|
-| Auth | `microservices/auth-service/Jenkinsfile` |
-| Business | `microservices/business-service/Jenkinsfile` |
-| Queue | `microservices/queue-service/Jenkinsfile` |
-| Frontend gateway | `microservices/frontend-service/Jenkinsfile` |
+| Service | Jenkinsfile path | Port |
+|---------|------------------|------|
+| **Auth Service** | `microservices/auth-service/Jenkinsfile` | 5001 |
+| **Business Service** | `microservices/business-service/Jenkinsfile` | 5002 |
+| **Queue Service** | `microservices/queue-service/Jenkinsfile` | 5003 |
+| **Ticket Service** | `microservices/ticket-service/Jenkinsfile` | 5004 |
+| **Feedback Service** | `microservices/feedback-service/Jenkinsfile` | 5005 |
+| **Analytics Service** | `microservices/analytics-service/Jenkinsfile` | 5006 |
+| **Notification Service** | `microservices/notification-service/Jenkinsfile` | 5007 |
+| **Frontend Gateway** | `microservices/frontend-service/Jenkinsfile` | 5000 |
 
 Create a Jenkins *Pipeline* (or Multibranch Pipeline) job per service and point it at the corresponding Jenkinsfile. The stages are consistent across services:
 
