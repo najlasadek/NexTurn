@@ -110,15 +110,27 @@ pipeline {
             steps {
                 script {
                     if (env.IS_WINDOWS == 'true') {
-                        bat """
-                            cd microservices
-                            docker build -f ${env.SERVICE_NAME}/Dockerfile -t ${env.IMAGE_TAG} -t ${env.IMAGE_LATEST} .
-                        """
+                        // Frontend service needs root directory as build context (for templates/static)
+                        if (env.SERVICE_NAME == 'frontend-service') {
+                            bat """
+                                docker build -f microservices/${env.SERVICE_NAME}/Dockerfile -t ${env.IMAGE_TAG} -t ${env.IMAGE_LATEST} .
+                            """
+                        } else {
+                            bat """
+                                cd microservices
+                                docker build -f ${env.SERVICE_NAME}/Dockerfile -t ${env.IMAGE_TAG} -t ${env.IMAGE_LATEST} .
+                            """
+                        }
                     } else {
                         sh '''
                             set -euo pipefail
-                            cd microservices
-                            docker build -f ${SERVICE_NAME}/Dockerfile -t ${IMAGE_TAG} -t ${IMAGE_LATEST} .
+                            # Frontend service needs root directory as build context (for templates/static)
+                            if [ "${SERVICE_NAME}" = "frontend-service" ]; then
+                                docker build -f microservices/${SERVICE_NAME}/Dockerfile -t ${IMAGE_TAG} -t ${IMAGE_LATEST} .
+                            else
+                                cd microservices
+                                docker build -f ${SERVICE_NAME}/Dockerfile -t ${IMAGE_TAG} -t ${IMAGE_LATEST} .
+                            fi
                         '''
                     }
                 }
