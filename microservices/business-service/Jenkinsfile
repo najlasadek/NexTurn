@@ -16,10 +16,11 @@ pipeline {
     environment {
         SERVICE_NAME = 'business-service'
         SERVICE_PATH = "microservices/${SERVICE_NAME}"
-        PYTHON_BIN = "${env.PYTHON_BIN ?: 'python3'}"
+        PYTHON_BIN = "${env.PYTHON_BIN ?: 'python'}"
         IMAGE_PREFIX = "${env.DOCKER_IMAGE_PREFIX ?: 'nexturn'}"
         IMAGE_TAG = "${IMAGE_PREFIX}/${SERVICE_NAME}:${env.BUILD_NUMBER}"
         IMAGE_LATEST = "${IMAGE_PREFIX}/${SERVICE_NAME}:latest"
+        IS_WINDOWS = "${env.OS?.contains('Windows') || env.OS?.contains('windows') ? 'true' : 'false'}"
     }
 
     stages {
@@ -32,24 +33,37 @@ pipeline {
         stage('Setup Python environment') {
             steps {
                 dir("${SERVICE_PATH}") {
-                    sh '''
-                        set -euo pipefail
-                        PY_CMD="${PYTHON_BIN}"
-                        if ! command -v "${PY_CMD}" >/dev/null 2>&1; then
-                            PY_CMD=python
-                        fi
+                    script {
+                        if (env.IS_WINDOWS == 'true') {
+                            bat """
+                                @echo off
+                                python -m venv venv
+                                call venv\\Scripts\\activate.bat
+                                python -m pip install --upgrade pip
+                                pip install -r requirements.txt
+                                pip install pytest
+                            """
+                        } else {
+                            sh '''
+                                set -euo pipefail
+                                PY_CMD="${PYTHON_BIN}"
+                                if ! command -v "${PY_CMD}" >/dev/null 2>&1; then
+                                    PY_CMD=python3
+                                fi
 
-                        "${PY_CMD}" -m venv venv
-                        if [ -f "venv/bin/activate" ]; then
-                            . venv/bin/activate
-                        else
-                            . venv/Scripts/activate
-                        fi
+                                "${PY_CMD}" -m venv venv
+                                if [ -f "venv/bin/activate" ]; then
+                                    . venv/bin/activate
+                                else
+                                    . venv/Scripts/activate
+                                fi
 
-                        pip install --upgrade pip
-                        pip install -r requirements.txt
-                        pip install pytest
-                    '''
+                                pip install --upgrade pip
+                                pip install -r requirements.txt
+                                pip install pytest
+                            '''
+                        }
+                    }
                 }
             }
         }
@@ -60,31 +74,54 @@ pipeline {
             }
             steps {
                 dir("${SERVICE_PATH}") {
-                    sh '''
-                        set -euo pipefail
-                        if [ -f "venv/bin/activate" ]; then
-                            . venv/bin/activate
-                        else
-                            . venv/Scripts/activate
-                        fi
+                    script {
+                        if (env.IS_WINDOWS == 'true') {
+                            bat """
+                                @echo off
+                                call venv\\Scripts\\activate.bat
+                                if exist tests (
+                                    pytest
+                                ) else (
+                                    echo No tests directory detected for ${env.SERVICE_NAME}; skipping pytest.
+                                )
+                            """
+                        } else {
+                            sh '''
+                                set -euo pipefail
+                                if [ -f "venv/bin/activate" ]; then
+                                    . venv/bin/activate
+                                else
+                                    . venv/Scripts/activate
+                                fi
 
-                        if [ -d "tests" ]; then
-                            pytest
-                        else
-                            echo "No tests directory detected for ${SERVICE_NAME}; skipping pytest."
-                        fi
-                    '''
+                                if [ -d "tests" ]; then
+                                    pytest
+                                else
+                                    echo "No tests directory detected for ${SERVICE_NAME}; skipping pytest."
+                                fi
+                            '''
+                        }
+                    }
                 }
             }
         }
 
         stage('Docker build') {
             steps {
-                sh '''
-                    set -euo pipefail
-                    cd microservices
-                    docker build -f ${SERVICE_NAME}/Dockerfile -t ${IMAGE_TAG} -t ${IMAGE_LATEST} .
-                '''
+                script {
+                    if (env.IS_WINDOWS == 'true') {
+                        bat """
+                            cd microservices
+                            docker build -f ${env.SERVICE_NAME}/Dockerfile -t ${env.IMAGE_TAG} -t ${env.IMAGE_LATEST} .
+                        """
+                    } else {
+                        sh '''
+                            set -euo pipefail
+                            cd microservices
+                            docker build -f ${SERVICE_NAME}/Dockerfile -t ${IMAGE_TAG} -t ${IMAGE_LATEST} .
+                        '''
+                    }
+                }
             }
         }
 
@@ -106,16 +143,26 @@ pipeline {
                         passwordVariable: 'DOCKER_PASS'
                     )
                 ]) {
-                    sh '''
-                        set -euo pipefail
-                        if [ -n "${DOCKER_LOGIN_SERVER:-}" ]; then
-                            echo "$DOCKER_PASS" | docker login "$DOCKER_LOGIN_SERVER" -u "$DOCKER_USER" --password-stdin
-                        else
-                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        fi
-                        docker push ${IMAGE_TAG}
-                        docker push ${IMAGE_LATEST}
-                    '''
+                    script {
+                        if (env.IS_WINDOWS == 'true') {
+                            bat """
+                                echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
+                                docker push ${env.IMAGE_TAG}
+                                docker push ${env.IMAGE_LATEST}
+                            """
+                        } else {
+                            sh '''
+                                set -euo pipefail
+                                if [ -n "${DOCKER_LOGIN_SERVER:-}" ]; then
+                                    echo "$DOCKER_PASS" | docker login "$DOCKER_LOGIN_SERVER" -u "$DOCKER_USER" --password-stdin
+                                else
+                                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                                fi
+                                docker push ${IMAGE_TAG}
+                                docker push ${IMAGE_LATEST}
+                            '''
+                        }
+                    }
                 }
             }
         }
@@ -134,12 +181,22 @@ pipeline {
                 withCredentials([
                     file(credentialsId: "${env.KUBECONFIG_CREDENTIALS_ID}", variable: 'KUBECONFIG_FILE')
                 ]) {
-                    sh """
-                        set -euo pipefail
-                        export KUBECONFIG=\${KUBECONFIG_FILE}
-                        kubectl -n ${params.K8S_NAMESPACE} set image deployment/${env.SERVICE_NAME} ${env.SERVICE_NAME}=${env.IMAGE_TAG}
-                        kubectl -n ${params.K8S_NAMESPACE} rollout status deployment/${env.SERVICE_NAME} --timeout=180s
-                    """
+                    script {
+                        if (env.IS_WINDOWS == 'true') {
+                            bat """
+                                set KUBECONFIG=%KUBECONFIG_FILE%
+                                kubectl -n ${params.K8S_NAMESPACE} set image deployment/${env.SERVICE_NAME} ${env.SERVICE_NAME}=${env.IMAGE_TAG}
+                                kubectl -n ${params.K8S_NAMESPACE} rollout status deployment/${env.SERVICE_NAME} --timeout=180s
+                            """
+                        } else {
+                            sh """
+                                set -euo pipefail
+                                export KUBECONFIG=\${KUBECONFIG_FILE}
+                                kubectl -n ${params.K8S_NAMESPACE} set image deployment/${env.SERVICE_NAME} ${env.SERVICE_NAME}=${env.IMAGE_TAG}
+                                kubectl -n ${params.K8S_NAMESPACE} rollout status deployment/${env.SERVICE_NAME} --timeout=180s
+                            """
+                        }
+                    }
                 }
             }
         }
@@ -148,7 +205,13 @@ pipeline {
     post {
         always {
             dir("${SERVICE_PATH}") {
-                sh 'rm -rf venv || true'
+                script {
+                    if (env.IS_WINDOWS == 'true') {
+                        bat 'if exist venv rmdir /s /q venv'
+                    } else {
+                        sh 'rm -rf venv || true'
+                    }
+                }
             }
             cleanWs()
         }
