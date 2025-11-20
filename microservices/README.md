@@ -410,6 +410,68 @@ docker-compose down
 | **Notification Service** | 5007 | 🚧 Planned | http://localhost:5007 | /api/health | Email/SMS/Push notifications |
 | **API Gateway** | 8080 | 🚧 Planned | http://localhost:8080 | /health | Routing & load balancing |
 
+## 🤖 Jenkins CI/CD
+
+Each implemented microservice now ships with its own declarative Jenkins pipeline so you can build, test, package, and deploy services independently.
+
+📖 **👉 [Complete Jenkins Setup Guide →](JENKINS_SETUP.md)** - Step-by-step instructions to install and configure Jenkins
+
+### Pipeline files
+
+| Service | Jenkinsfile path |
+|---------|------------------|
+| Auth | `microservices/auth-service/Jenkinsfile` |
+| Business | `microservices/business-service/Jenkinsfile` |
+| Queue | `microservices/queue-service/Jenkinsfile` |
+| Frontend gateway | `microservices/frontend-service/Jenkinsfile` |
+
+Create a Jenkins *Pipeline* (or Multibranch Pipeline) job per service and point it at the corresponding Jenkinsfile. The stages are consistent across services:
+
+1. **Checkout** – pulls the repository.
+2. **Setup Python environment** – creates a virtual environment and installs requirements + `pytest`.
+3. **Unit tests** – runs pytest only if a `tests/` directory exists (can be skipped with the `RUN_TESTS` parameter).
+4. **Docker build** – builds and tags an image using the service Dockerfile.
+5. **Push image** *(optional)* – pushes to your registry when `PUSH_IMAGE=true`.
+6. **Deploy to Minikube** *(optional)* – updates the matching Kubernetes deployment via `kubectl set image` when `DEPLOY_TO_MINIKUBE=true`.
+
+### Required Jenkins tooling
+
+- Docker CLI (to build/push images)
+- Python 3.x (for virtualenv / pytest)
+- kubectl + access to Minikube (only for deployment stage)
+
+### Environment variables & credentials
+
+Configure these in each Jenkins job (Manage Jenkins ➜ Credentials / job configuration):
+
+| Variable | Purpose |
+|----------|---------|
+| `DOCKER_IMAGE_PREFIX` | Image prefix, e.g. `docker.io/username/nexturn` (default: `nexturn`). |
+| `DOCKER_CREDENTIALS_ID` | Jenkins credential ID for Docker registry login (username/password). Required when pushing. |
+| `DOCKER_LOGIN_SERVER` | Optional registry hostname passed to `docker login` (default: Docker Hub). |
+| `KUBECONFIG_CREDENTIALS_ID` | Jenkins file credential containing kubeconfig for the Minikube cluster. Required when deploying. |
+| `PYTHON_BIN` | Override Python binary name if `python3` is not available (default: `python3`). |
+
+### Runtime parameters
+
+Each Jenkinsfile exposes parameters you can toggle per run:
+
+- `RUN_TESTS` – skip pytest when false.
+- `PUSH_IMAGE` – enable/disable publishing to the registry.
+- `DEPLOY_TO_MINIKUBE` – enable/disable `kubectl set image` rollout.
+- `K8S_NAMESPACE` – namespace for rollout commands (defaults to `nexturn`).
+
+### Suggested job names
+
+```
+NexTurn-auth-service
+NexTurn-business-service
+NexTurn-queue-service
+NexTurn-frontend-service
+```
+
+Once the individual jobs are in place you can wire up a freestyle “umbrella” job (or use Jenkins Build Pipeline view) to trigger multiple services in parallel for a full release.
+
 ### 🔌 Current Service Endpoints (Implemented)
 
 #### **Authentication Service (Port 5001)**

@@ -1,0 +1,158 @@
+pipeline {
+    agent any
+
+    parameters {
+        booleanParam(name: 'RUN_TESTS', defaultValue: true, description: 'Run pytest if a tests directory exists.')
+        booleanParam(name: 'PUSH_IMAGE', defaultValue: false, description: 'Push the freshly built Docker image to the registry.')
+        booleanParam(name: 'DEPLOY_TO_MINIKUBE', defaultValue: false, description: 'Update the Minikube deployment after a successful build.')
+        string(name: 'K8S_NAMESPACE', defaultValue: 'nexturn', description: 'Kubernetes namespace to target when deploying.')
+    }
+
+    options {
+        ansiColor('xterm')
+        timestamps()
+        disableConcurrentBuilds()
+    }
+
+    environment {
+        SERVICE_NAME = 'business-service'
+        SERVICE_PATH = "microservices/${SERVICE_NAME}"
+        PYTHON_BIN = "${env.PYTHON_BIN ?: 'python3'}"
+        IMAGE_PREFIX = "${env.DOCKER_IMAGE_PREFIX ?: 'nexturn'}"
+        IMAGE_TAG = "${IMAGE_PREFIX}/${SERVICE_NAME}:${env.BUILD_NUMBER}"
+        IMAGE_LATEST = "${IMAGE_PREFIX}/${SERVICE_NAME}:latest"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Setup Python environment') {
+            steps {
+                dir("${SERVICE_PATH}") {
+                    sh '''
+                        set -euo pipefail
+                        PY_CMD="${PYTHON_BIN}"
+                        if ! command -v "${PY_CMD}" >/dev/null 2>&1; then
+                            PY_CMD=python
+                        fi
+
+                        "${PY_CMD}" -m venv venv
+                        if [ -f "venv/bin/activate" ]; then
+                            . venv/bin/activate
+                        else
+                            . venv/Scripts/activate
+                        fi
+
+                        pip install --upgrade pip
+                        pip install -r requirements.txt
+                        pip install pytest
+                    '''
+                }
+            }
+        }
+
+        stage('Unit tests') {
+            when {
+                expression { return params.RUN_TESTS }
+            }
+            steps {
+                dir("${SERVICE_PATH}") {
+                    sh '''
+                        set -euo pipefail
+                        if [ -f "venv/bin/activate" ]; then
+                            . venv/bin/activate
+                        else
+                            . venv/Scripts/activate
+                        fi
+
+                        if [ -d "tests" ]; then
+                            pytest
+                        else
+                            echo "No tests directory detected for ${SERVICE_NAME}; skipping pytest."
+                        fi
+                    '''
+                }
+            }
+        }
+
+        stage('Docker build') {
+            steps {
+                sh '''
+                    set -euo pipefail
+                    cd microservices
+                    docker build -f ${SERVICE_NAME}/Dockerfile -t ${IMAGE_TAG} -t ${IMAGE_LATEST} .
+                '''
+            }
+        }
+
+        stage('Push image') {
+            when {
+                expression { return params.PUSH_IMAGE }
+            }
+            steps {
+                script {
+                    if (!env.DOCKER_CREDENTIALS_ID?.trim()) {
+                        error('Set DOCKER_CREDENTIALS_ID in the Jenkins job configuration to enable docker pushes.')
+                    }
+                }
+
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: "${env.DOCKER_CREDENTIALS_ID}",
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
+                    sh '''
+                        set -euo pipefail
+                        if [ -n "${DOCKER_LOGIN_SERVER:-}" ]; then
+                            echo "$DOCKER_PASS" | docker login "$DOCKER_LOGIN_SERVER" -u "$DOCKER_USER" --password-stdin
+                        else
+                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        fi
+                        docker push ${IMAGE_TAG}
+                        docker push ${IMAGE_LATEST}
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy to Minikube') {
+            when {
+                expression { return params.DEPLOY_TO_MINIKUBE }
+            }
+            steps {
+                script {
+                    if (!env.KUBECONFIG_CREDENTIALS_ID?.trim()) {
+                        error('Set KUBECONFIG_CREDENTIALS_ID in the Jenkins job configuration to enable deployments.')
+                    }
+                }
+
+                withCredentials([
+                    file(credentialsId: "${env.KUBECONFIG_CREDENTIALS_ID}", variable: 'KUBECONFIG_FILE')
+                ]) {
+                    sh """
+                        set -euo pipefail
+                        export KUBECONFIG=\${KUBECONFIG_FILE}
+                        kubectl -n ${params.K8S_NAMESPACE} set image deployment/${env.SERVICE_NAME} ${env.SERVICE_NAME}=${env.IMAGE_TAG}
+                        kubectl -n ${params.K8S_NAMESPACE} rollout status deployment/${env.SERVICE_NAME} --timeout=180s
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            dir("${SERVICE_PATH}") {
+                sh 'rm -rf venv || true'
+            }
+            cleanWs()
+        }
+    }
+}
+
