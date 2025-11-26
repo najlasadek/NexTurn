@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Queue History - NexTurn</title>
     <link rel="icon" href="{{ url_for('static', filename='logo.png') }}" />
     <script src="https://cdn.tailwindcss.com"></script>
@@ -20,86 +20,226 @@
         },
       };
     </script>
-</head>
-<body class="bg-gray-50">
+  </head>
+  <body class="bg-gray-50">
     <nav class="bg-white shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center space-x-2">
-                    <img src="{{ url_for('static', filename='logo.png') }}" alt="NexTurn" class="h-8 w-8"/>
-                    <span class="text-xl font-bold text-gray-900">NexTurn</span>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <a href="{{ url_for('home') }}" class="text-gray-700 hover:text-primary">Home</a>
-                    <a href="{{ url_for('businesses_list') }}" class="text-gray-700 hover:text-accent2">Browse Businesses</a>
-                    <a href="{{ url_for('logout') }}" class="text-gray-700 hover:text-accent1">Logout</a>
-                </div>
-            </div>
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+          <div class="flex items-center space-x-2">
+            <img
+              src="{{ url_for('static', filename='logo.png') }}"
+              alt="NexTurn"
+              class="h-8 w-8"
+            />
+            <span class="text-xl font-bold text-gray-900">NexTurn</span>
+          </div>
+          <div class="flex items-center space-x-4">
+            <a
+              href="{{ url_for('home') }}"
+              class="text-gray-700 hover:text-primary"
+              >Home</a
+            >
+            <a
+              href="{{ url_for('businesses_list') }}"
+              class="text-gray-700 hover:text-accent2"
+              >Browse Businesses</a
+            >
+            <a
+              href="{{ url_for('logout') }}"
+              class="text-gray-700 hover:text-accent1"
+              >Logout</a
+            >
+          </div>
         </div>
+      </div>
     </nav>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-8">Your Queue History</h1>
+      <h1 class="text-3xl font-bold text-gray-900 mb-8">Your Queue History</h1>
 
-        {% if history %}
-            <div class="bg-white rounded-xl shadow-md overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Business</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Queue</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Position</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Wait Time</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            {% for item in history %}
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                    {{ item.business_name }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {{ item.queue_name }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    #{{ item.position }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {{ item.join_time }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                                        {% if item.status == 'completed' %}bg-green-100 text-green-800
-                                        {% elif item.status == 'cancelled' %}bg-red-100 text-red-800
-                                        {% else %}bg-blue-100 text-blue-800{% endif %}">
-                                        {{ item.status|capitalize }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {% if item.wait_time %}
-                                        {{ "%.1f"|format(item.wait_time) }} min
-                                    {% else %}
-                                        -
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        {% else %}
-            <div class="text-center py-12 bg-white rounded-xl shadow-md">
-                <p class="text-gray-500 text-lg">No queue history yet.</p>
-                <p class="text-sm text-gray-400 mt-2">Join a queue to see your history here</p>
-                <a href="{{ url_for('businesses_list') }}" class="mt-4 inline-block px-6 py-3 bg-primary text-white rounded-lg hover:bg-accent1 transition">
-                    Browse Businesses
-                </a>
-            </div>
-        {% endif %}
+      <div id="loadingMsg" class="text-center py-12">
+        <p class="text-gray-500">Loading your queue history...</p>
+      </div>
+
+      <div id="historyContainer" class="hidden">
+        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Business
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Queue
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Position
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Joined
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Status
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Wait Time
+                  </th>
+                </tr>
+              </thead>
+              <tbody
+                id="historyTableBody"
+                class="bg-white divide-y divide-gray-200"
+              ></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div
+        id="noHistoryMsg"
+        class="hidden text-center py-12 bg-white rounded-xl shadow-md"
+      >
+        <p class="text-gray-500 text-lg">No queue history yet.</p>
+        <p class="text-sm text-gray-400 mt-2">
+          Join a queue to see your history here
+        </p>
+        <a
+          href="{{ url_for('businesses_list') }}"
+          class="mt-4 inline-block px-6 py-3 bg-primary text-white rounded-lg hover:bg-accent1 transition"
+        >
+          Browse Businesses
+        </a>
+      </div>
     </div>
-</body>
+
+    <script src="{{ url_for('static', filename='api-config.js') }}"></script>
+    <script>
+      // Load queue history on page load
+      document.addEventListener("DOMContentLoaded", async function () {
+        await loadQueueHistory();
+      });
+
+      async function loadQueueHistory() {
+        try {
+          const token = localStorage.getItem("token");
+          if (!token) {
+            window.location.href = "/login";
+            return;
+          }
+
+          const data = await fetch(API.ticket.myHistory, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }).then((r) => r.json());
+
+          if (
+            data.success &&
+            data.data.history &&
+            data.data.history.length > 0
+          ) {
+            // Fetch business details for each history item
+            const historyWithBusinesses = await Promise.all(
+              data.data.history.map(async (item) => {
+                try {
+                  const businessData = await fetch(
+                    API.business.detail(item.business_id),
+                    {
+                      headers: {
+                        Authorization: `Bearer ${token}`,
+                      },
+                    }
+                  ).then((r) => r.json());
+
+                  return {
+                    ...item,
+                    business_name: businessData.success
+                      ? businessData.data.business.name
+                      : "Unknown Business",
+                  };
+                } catch (error) {
+                  console.error("Error fetching business:", error);
+                  return {
+                    ...item,
+                    business_name: "Unknown Business",
+                  };
+                }
+              })
+            );
+
+            renderQueueHistory(historyWithBusinesses);
+          } else {
+            document.getElementById("loadingMsg").classList.add("hidden");
+            document.getElementById("noHistoryMsg").classList.remove("hidden");
+          }
+        } catch (error) {
+          console.error("Error loading queue history:", error);
+          document.getElementById("loadingMsg").classList.add("hidden");
+          document.getElementById("noHistoryMsg").classList.remove("hidden");
+        }
+      }
+
+      function renderQueueHistory(history) {
+        const tbody = document.getElementById("historyTableBody");
+        tbody.innerHTML = "";
+
+        history.forEach((item) => {
+          const tr = document.createElement("tr");
+
+          const statusClass =
+            item.status === "completed"
+              ? "bg-green-100 text-green-800"
+              : item.status === "cancelled"
+              ? "bg-red-100 text-red-800"
+              : "bg-blue-100 text-blue-800";
+
+          const waitTime = item.wait_time
+            ? `${parseFloat(item.wait_time).toFixed(1)} min`
+            : "-";
+          const statusText =
+            item.status.charAt(0).toUpperCase() + item.status.slice(1);
+
+          tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        ${item.business_name || "Unknown Business"}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        ${item.queue_name || "Unknown Queue"}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        #${item.position}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        ${new Date(item.join_time).toLocaleString()}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">
+                            ${statusText}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        ${waitTime}
+                    </td>
+                `;
+          tbody.appendChild(tr);
+        });
+
+        document.getElementById("loadingMsg").classList.add("hidden");
+        document.getElementById("historyContainer").classList.remove("hidden");
+      }
+    </script>
+  </body>
 </html>

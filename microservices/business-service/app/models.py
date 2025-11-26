@@ -41,7 +41,7 @@ class Business:
         try:
             # Call Queue Service to create default queue
             response = requests.post(
-                f"{self.queue_service_url}/queues",
+                f"{self.queue_service_url}/api/queues",
                 json={
                     'business_id': business_id,
                     'name': 'Main Queue',

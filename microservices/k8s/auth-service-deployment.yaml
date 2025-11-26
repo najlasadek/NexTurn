@@ -16,46 +16,46 @@ spec:
         app: auth-service
     spec:
       containers:
-      - name: auth-service
-        image: auth-service:latest
-        imagePullPolicy: Never
-        ports:
-        - containerPort: 5001
-        env:
-        - name: AUTH_SERVICE_PORT
-          value: "5001"
-        - name: JWT_SECRET_KEY
-          value: "your-secret-key-change-in-production"
-        - name: PYTHONPATH
-          value: "/app:/app/shared"
-        - name: DB_PATH
-          value: "/app/data/auth.db"
-        volumeMounts:
-        - name: auth-db
-          mountPath: /app/data
-        resources:
-          requests:
-            memory: "128Mi"
-            cpu: "100m"
-          limits:
-            memory: "256Mi"
-            cpu: "200m"
-        livenessProbe:
-          httpGet:
-            path: /auth/health
-            port: 5001
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /auth/health
-            port: 5001
-          initialDelaySeconds: 5
-          periodSeconds: 5
+        - name: auth-service
+          image: microservices-auth-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5001
+          env:
+            - name: AUTH_SERVICE_PORT
+              value: "5001"
+            - name: JWT_SECRET_KEY
+              value: "your-secret-key-change-in-production"
+            - name: PYTHONPATH
+              value: "/app:/app/shared"
+            - name: DB_PATH
+              value: "/app/data/auth.db"
+          volumeMounts:
+            - name: auth-db
+              mountPath: /app/data
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+          livenessProbe:
+            httpGet:
+              path: /auth/health
+              port: 5001
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /auth/health
+              port: 5001
+            initialDelaySeconds: 5
+            periodSeconds: 5
       volumes:
-      - name: auth-db
-        persistentVolumeClaim:
-          claimName: auth-db-pvc
+        - name: auth-db
+          persistentVolumeClaim:
+            claimName: auth-db-pvc
 ---
 apiVersion: v1
 kind: Service

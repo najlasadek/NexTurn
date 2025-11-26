@@ -16,44 +16,44 @@ spec:
         app: analytics-service
     spec:
       containers:
-      - name: analytics-service
-        image: analytics-service:latest
-        imagePullPolicy: Never
-        ports:
-        - containerPort: 5006
-        env:
-        - name: ANALYTICS_SERVICE_PORT
-          value: "5006"
-        - name: PYTHONPATH
-          value: "/app"
-        - name: DB_PATH
-          value: "/app/data/analytics.db"
-        volumeMounts:
-        - name: analytics-db
-          mountPath: /app/data
-        resources:
-          requests:
-            memory: "128Mi"
-            cpu: "100m"
-          limits:
-            memory: "256Mi"
-            cpu: "200m"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 5006
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 5006
-          initialDelaySeconds: 5
-          periodSeconds: 5
+        - name: analytics-service
+          image: microservices-analytics-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5006
+          env:
+            - name: ANALYTICS_SERVICE_PORT
+              value: "5006"
+            - name: PYTHONPATH
+              value: "/app"
+            - name: DB_PATH
+              value: "/app/data/analytics.db"
+          volumeMounts:
+            - name: analytics-db
+              mountPath: /app/data
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5006
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5006
+            initialDelaySeconds: 5
+            periodSeconds: 5
       volumes:
-      - name: analytics-db
-        persistentVolumeClaim:
-          claimName: analytics-db-pvc
+        - name: analytics-db
+          persistentVolumeClaim:
+            claimName: analytics-db-pvc
 ---
 apiVersion: v1
 kind: Service
@@ -80,4 +80,3 @@ spec:
   resources:
     requests:
       storage: 1Gi
-

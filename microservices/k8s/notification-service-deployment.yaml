@@ -16,44 +16,44 @@ spec:
         app: notification-service
     spec:
       containers:
-      - name: notification-service
-        image: notification-service:latest
-        imagePullPolicy: Never
-        ports:
-        - containerPort: 5007
-        env:
-        - name: NOTIFICATION_SERVICE_PORT
-          value: "5007"
-        - name: PYTHONPATH
-          value: "/app"
-        - name: DB_PATH
-          value: "/app/data/notifications.db"
-        volumeMounts:
-        - name: notification-db
-          mountPath: /app/data
-        resources:
-          requests:
-            memory: "128Mi"
-            cpu: "100m"
-          limits:
-            memory: "256Mi"
-            cpu: "200m"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 5007
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 5007
-          initialDelaySeconds: 5
-          periodSeconds: 5
+        - name: notification-service
+          image: microservices-notification-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5007
+          env:
+            - name: NOTIFICATION_SERVICE_PORT
+              value: "5007"
+            - name: PYTHONPATH
+              value: "/app"
+            - name: DB_PATH
+              value: "/app/data/notifications.db"
+          volumeMounts:
+            - name: notification-db
+              mountPath: /app/data
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5007
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5007
+            initialDelaySeconds: 5
+            periodSeconds: 5
       volumes:
-      - name: notification-db
-        persistentVolumeClaim:
-          claimName: notification-db-pvc
+        - name: notification-db
+          persistentVolumeClaim:
+            claimName: notification-db-pvc
 ---
 apiVersion: v1
 kind: Service
@@ -80,4 +80,3 @@ spec:
   resources:
     requests:
       storage: 1Gi
-

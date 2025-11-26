@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Customer Feedback - {{ business_name }}</title>
     <link rel="icon" href="{{ url_for('static', filename='logo.png') }}" />
     <script src="https://cdn.tailwindcss.com"></script>
@@ -20,71 +20,261 @@
         },
       };
     </script>
-</head>
-<body class="bg-gray-50">
+  </head>
+  <body class="bg-gray-50">
     <nav class="bg-white shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center space-x-2">
-                    <img src="{{ url_for('static', filename='logo.png') }}" alt="NexTurn" class="h-8 w-8"/>
-                    <span class="text-xl font-bold text-gray-900">NexTurn Business</span>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <a href="{{ url_for('business_dashboard') }}" class="text-gray-700 hover:text-primary">Dashboard</a>
-                    <a href="{{ url_for('logout') }}" class="text-gray-700 hover:text-accent1">Logout</a>
-                </div>
-            </div>
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+          <div class="flex items-center space-x-2">
+            <img
+              src="{{ url_for('static', filename='logo.png') }}"
+              alt="NexTurn"
+              class="h-8 w-8"
+            />
+            <span class="text-xl font-bold text-gray-900"
+              >NexTurn Business</span
+            >
+          </div>
+          <div class="flex items-center space-x-4">
+            <a
+              href="{{ url_for('business_dashboard') }}"
+              class="text-gray-700 hover:text-primary"
+              >Dashboard</a
+            >
+            <a
+              href="{{ url_for('logout') }}"
+              class="text-gray-700 hover:text-accent1"
+              >Logout</a
+            >
+          </div>
         </div>
+      </div>
     </nav>
 
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">Customer Feedback</h1>
-            <p class="text-gray-600 mt-2">{{ business_name }}</p>
-        </div>
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Customer Feedback</h1>
+        <p id="businessName" class="text-gray-600 mt-2">Loading...</p>
+      </div>
 
-        <!-- Average Rating -->
-        <div class="bg-white rounded-xl shadow-md p-6 mb-8">
-            <div class="text-center">
-                <p class="text-sm text-gray-600 mb-2">Average Rating</p>
-                <p class="text-5xl font-bold text-accent2">{{ avg_rating }}</p>
-                <p class="text-sm text-gray-500 mt-2">Based on {{ feedback|length }} review(s)</p>
-            </div>
+      <!-- Average Rating -->
+      <div
+        id="avgRatingContainer"
+        class="bg-white rounded-xl shadow-md p-6 mb-8 hidden"
+      >
+        <div class="text-center">
+          <p class="text-sm text-gray-600 mb-2">Average Rating</p>
+          <p id="avgRating" class="text-5xl font-bold text-accent2">0.0</p>
+          <p id="reviewCount" class="text-sm text-gray-500 mt-2">
+            Based on 0 review(s)
+          </p>
         </div>
+      </div>
 
-        <!-- Feedback List -->
-        {% if feedback %}
-            <div class="space-y-4">
-                {% for item in feedback %}
-                <div class="bg-white rounded-xl shadow-md p-6">
-                    <div class="flex items-start justify-between mb-3">
-                        <div>
-                            <p class="font-semibold text-gray-900">{{ item.user_name }}</p>
-                            <p class="text-sm text-gray-500">{{ item.created_at }}</p>
-                        </div>
-                        <div class="flex items-center space-x-1">
-                            {% for i in range(1, 6) %}
-                                <svg class="w-5 h-5 {% if i <= item.rating %}text-accent2{% else %}text-gray-300{% endif %}" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
-                            {% endfor %}
-                            <span class="ml-2 text-sm font-semibold text-gray-700">{{ item.rating }}/5</span>
-                        </div>
-                    </div>
-                    {% if item.comment %}
-                        <p class="text-gray-700">{{ item.comment }}</p>
-                    {% else %}
-                        <p class="text-gray-400 italic">No comment provided</p>
-                    {% endif %}
-                </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="text-center py-12 bg-white rounded-xl shadow-md">
-                <p class="text-gray-500 text-lg">No feedback yet</p>
-                <p class="text-sm text-gray-400 mt-2">Customer reviews will appear here</p>
-            </div>
-        {% endif %}
+      <div id="loadingMsg" class="text-center py-12">
+        <p class="text-gray-500">Loading feedback...</p>
+      </div>
+
+      <!-- Feedback List -->
+      <div id="feedbackContainer" class="hidden space-y-4"></div>
+
+      <div
+        id="noFeedbackMsg"
+        class="hidden text-center py-12 bg-white rounded-xl shadow-md"
+      >
+        <p class="text-gray-500 text-lg">No feedback yet</p>
+        <p class="text-sm text-gray-400 mt-2">
+          Customer reviews will appear here
+        </p>
+      </div>
     </div>
-</body>
+
+    <script src="{{ url_for('static', filename='api-config.js') }}"></script>
+    <script>
+      // Extract business_id from template variable or URL
+      const businessId = {% if business_id is defined %}{{ business_id }}{% else %}parseInt(window.location.pathname.match(/\/business\/(\d+)\/feedback-list/)?.[1] || '0'){% endif %};
+
+      if (!businessId || businessId === 0) {
+        console.error('Business ID not found');
+        document.getElementById('loadingMsg').innerHTML = '<p class="text-red-500">Error: Business ID not found. Please access this page from a business page.</p>';
+      }
+
+      document.addEventListener("DOMContentLoaded", async function () {
+        await loadFeedback();
+      });
+
+      async function loadFeedback() {
+        try {
+          if (!businessId || businessId === 0) {
+            document.getElementById('loadingMsg').classList.add('hidden');
+            document.getElementById('noFeedbackMsg').classList.remove('hidden');
+            return;
+          }
+
+          const token = localStorage.getItem("token");
+          if (!token) {
+            window.location.href = "/login";
+            return;
+          }
+
+          // Fetch business name
+          try {
+            const businessData = await fetch(API.business.detail(businessId), {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }).then((r) => r.json());
+
+            if (businessData.success) {
+              document.getElementById("businessName").textContent =
+                businessData.data.business.name;
+            }
+          } catch (error) {
+            console.error("Error fetching business:", error);
+          }
+
+          // Fetch feedback
+          console.log('Fetching feedback for business ID:', businessId);
+          const feedbackResponse = await fetch(
+            API.feedback.businessFeedback(businessId),
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          if (!feedbackResponse.ok) {
+            throw new Error(`Failed to fetch feedback: ${feedbackResponse.status} ${feedbackResponse.statusText}`);
+          }
+
+          const feedbackData = await feedbackResponse.json();
+          console.log('Feedback data received:', feedbackData);
+
+          // Fetch average rating
+          const avgResponse = await fetch(
+            API.feedback.businessAverage(businessId),
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          const avgData = avgResponse.ok ? await avgResponse.json() : { average_rating: 0 };
+
+          // Handle feedback response - check both possible response formats
+          const feedbackList = feedbackData.feedback || feedbackData.data?.feedback || [];
+
+          if (feedbackList.length > 0) {
+            // Fetch user names for each feedback
+            const feedbackWithUsers = await Promise.all(
+              feedbackList.map(async (item) => {
+                try {
+                  // Try to get user profile (may not always work if user deleted)
+                  const userData = await fetch(
+                    `${API.auth.profile}?user_id=${item.user_id}`,
+                    {
+                      headers: {
+                        Authorization: `Bearer ${token}`,
+                      },
+                    }
+                  )
+                    .then((r) => r.json())
+                    .catch(() => null);
+
+                  return {
+                    ...item,
+                    user_name:
+                      userData?.data?.full_name || `User #${item.user_id}`,
+                  };
+                } catch (error) {
+                  return {
+                    ...item,
+                    user_name: `User #${item.user_id}`,
+                  };
+                }
+              })
+            );
+
+            renderFeedback(feedbackWithUsers, avgData);
+          } else {
+            console.log('No feedback found for business:', businessId);
+            document.getElementById("loadingMsg").classList.add("hidden");
+            document.getElementById("noFeedbackMsg").classList.remove("hidden");
+            // Still show average rating if available
+            if (avgData && avgData.average_rating !== undefined) {
+              document.getElementById("avgRating").textContent = avgData.average_rating.toFixed(1);
+              document.getElementById("reviewCount").textContent = "Based on 0 review(s)";
+              document.getElementById("avgRatingContainer").classList.remove("hidden");
+            }
+          }
+        } catch (error) {
+          console.error("Error loading feedback:", error);
+          document.getElementById("loadingMsg").innerHTML = `<p class="text-red-500">Error loading feedback: ${error.message}</p>`;
+          // Don't hide loading message, show error instead
+        }
+      }
+
+      function renderFeedback(feedback, avgData) {
+        const container = document.getElementById("feedbackContainer");
+        container.innerHTML = "";
+
+        feedback.forEach((item) => {
+          const div = document.createElement("div");
+          div.className = "bg-white rounded-xl shadow-md p-6";
+
+          const stars = Array.from(
+            { length: 5 },
+            (_, i) =>
+              `<svg class="w-5 h-5 ${
+                i < item.rating ? "text-accent2" : "text-gray-300"
+              }" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                  </svg>`
+          ).join("");
+
+          div.innerHTML = `
+                  <div class="flex items-start justify-between mb-3">
+                      <div>
+                          <p class="font-semibold text-gray-900">${
+                            item.user_name || "Anonymous"
+                          }</p>
+                          <p class="text-sm text-gray-500">${new Date(
+                            item.created_at
+                          ).toLocaleString()}</p>
+                      </div>
+                      <div class="flex items-center space-x-1">
+                          ${stars}
+                          <span class="ml-2 text-sm font-semibold text-gray-700">${
+                            item.rating
+                          }/5</span>
+                      </div>
+                  </div>
+                  ${
+                    item.comment
+                      ? `<p class="text-gray-700">${item.comment}</p>`
+                      : '<p class="text-gray-400 italic">No comment provided</p>'
+                  }
+              `;
+          container.appendChild(div);
+        });
+
+        // Update average rating
+        if (avgData && avgData.average_rating !== undefined) {
+          document.getElementById("avgRating").textContent =
+            avgData.average_rating.toFixed(1);
+          document.getElementById(
+            "reviewCount"
+          ).textContent = `Based on ${feedback.length} review(s)`;
+          document
+            .getElementById("avgRatingContainer")
+            .classList.remove("hidden");
+        }
+
+        document.getElementById("loadingMsg").classList.add("hidden");
+        document.getElementById("feedbackContainer").classList.remove("hidden");
+      }
+    </script>
+  </body>
 </html>

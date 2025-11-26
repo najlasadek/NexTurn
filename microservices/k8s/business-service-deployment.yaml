@@ -16,46 +16,46 @@ spec:
         app: business-service
     spec:
       containers:
-      - name: business-service
-        image: business-service:latest
-        imagePullPolicy: Never
-        ports:
-        - containerPort: 5002
-        env:
-        - name: BUSINESS_SERVICE_PORT
-          value: "5002"
-        - name: QUEUE_SERVICE_URL
-          value: "http://queue-service:5003"
-        - name: PYTHONPATH
-          value: "/app:/app/shared"
-        - name: DB_PATH
-          value: "/app/data/business.db"
-        volumeMounts:
-        - name: business-db
-          mountPath: /app/data
-        resources:
-          requests:
-            memory: "128Mi"
-            cpu: "100m"
-          limits:
-            memory: "256Mi"
-            cpu: "200m"
-        livenessProbe:
-          httpGet:
-            path: /api/health
-            port: 5002
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /api/health
-            port: 5002
-          initialDelaySeconds: 5
-          periodSeconds: 5
+        - name: business-service
+          image: microservices-business-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5002
+          env:
+            - name: BUSINESS_SERVICE_PORT
+              value: "5002"
+            - name: QUEUE_SERVICE_URL
+              value: "http://queue-service:5003"
+            - name: PYTHONPATH
+              value: "/app:/app/shared"
+            - name: DB_PATH
+              value: "/app/data/business.db"
+          volumeMounts:
+            - name: business-db
+              mountPath: /app/data
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 5002
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 5002
+            initialDelaySeconds: 5
+            periodSeconds: 5
       volumes:
-      - name: business-db
-        persistentVolumeClaim:
-          claimName: business-db-pvc
+        - name: business-db
+          persistentVolumeClaim:
+            claimName: business-db-pvc
 ---
 apiVersion: v1
 kind: Service

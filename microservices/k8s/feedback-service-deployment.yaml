@@ -16,44 +16,44 @@ spec:
         app: feedback-service
     spec:
       containers:
-      - name: feedback-service
-        image: feedback-service:latest
-        imagePullPolicy: Never
-        ports:
-        - containerPort: 5005
-        env:
-        - name: FEEDBACK_SERVICE_PORT
-          value: "5005"
-        - name: PYTHONPATH
-          value: "/app"
-        - name: DB_PATH
-          value: "/app/data/feedback.db"
-        volumeMounts:
-        - name: feedback-db
-          mountPath: /app/data
-        resources:
-          requests:
-            memory: "128Mi"
-            cpu: "100m"
-          limits:
-            memory: "256Mi"
-            cpu: "200m"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 5005
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 5005
-          initialDelaySeconds: 5
-          periodSeconds: 5
+        - name: feedback-service
+          image: microservices-feedback-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5005
+          env:
+            - name: FEEDBACK_SERVICE_PORT
+              value: "5005"
+            - name: PYTHONPATH
+              value: "/app"
+            - name: DB_PATH
+              value: "/app/data/feedback.db"
+          volumeMounts:
+            - name: feedback-db
+              mountPath: /app/data
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5005
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5005
+            initialDelaySeconds: 5
+            periodSeconds: 5
       volumes:
-      - name: feedback-db
-        persistentVolumeClaim:
-          claimName: feedback-db-pvc
+        - name: feedback-db
+          persistentVolumeClaim:
+            claimName: feedback-db-pvc
 ---
 apiVersion: v1
 kind: Service
@@ -80,4 +80,3 @@ spec:
   resources:
     requests:
       storage: 1Gi
-

@@ -16,44 +16,44 @@ spec:
         app: ticket-service
     spec:
       containers:
-      - name: ticket-service
-        image: ticket-service:latest
-        imagePullPolicy: Never
-        ports:
-        - containerPort: 5004
-        env:
-        - name: TICKET_SERVICE_PORT
-          value: "5004"
-        - name: PYTHONPATH
-          value: "/app"
-        - name: DB_PATH
-          value: "/app/data/ticket.db"
-        volumeMounts:
-        - name: ticket-db
-          mountPath: /app/data
-        resources:
-          requests:
-            memory: "128Mi"
-            cpu: "100m"
-          limits:
-            memory: "256Mi"
-            cpu: "200m"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 5004
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 5004
-          initialDelaySeconds: 5
-          periodSeconds: 5
+        - name: ticket-service
+          image: microservices-ticket-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5004
+          env:
+            - name: TICKET_SERVICE_PORT
+              value: "5004"
+            - name: PYTHONPATH
+              value: "/app"
+            - name: DB_PATH
+              value: "/app/data/ticket.db"
+          volumeMounts:
+            - name: ticket-db
+              mountPath: /app/data
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5004
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5004
+            initialDelaySeconds: 5
+            periodSeconds: 5
       volumes:
-      - name: ticket-db
-        persistentVolumeClaim:
-          claimName: ticket-db-pvc
+        - name: ticket-db
+          persistentVolumeClaim:
+            claimName: ticket-db-pvc
 ---
 apiVersion: v1
 kind: Service
@@ -80,4 +80,3 @@ spec:
   resources:
     requests:
       storage: 1Gi
-

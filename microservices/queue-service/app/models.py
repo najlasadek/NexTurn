@@ -172,10 +172,6 @@ class TicketModel:
         if ticket['user_id'] != user_id:
             return False, 'Unauthorized'
 
-        # Don't allow canceling if user is first in queue
-        if ticket['position'] == 1:
-            return False, 'Cannot cancel when you are next in line'
-
         # Update ticket status
         query = """
             UPDATE queue_history
@@ -242,13 +238,18 @@ class TicketModel:
             print(f"Error recalculating positions: {e}")
 
     def get_user_history(self, user_id, limit=50):
-        """Get user's queue history"""
+        """Get user's queue history with queue and business names"""
+        # Note: This query doesn't join with businesses table since it's in a different service
+        # We'll return queue_id and let the frontend fetch business details if needed
+        # Or we can make an API call from the frontend to get business name
         query = """
-            SELECT id, queue_id, user_id, ticket_id, position, join_time,
-                   leave_time, wait_time, status
-            FROM queue_history
-            WHERE user_id = ?
-            ORDER BY join_time DESC
+            SELECT qh.id, qh.queue_id, qh.user_id, qh.ticket_id, qh.position, qh.join_time,
+                   qh.leave_time, qh.wait_time, qh.status,
+                   q.name as queue_name, q.business_id
+            FROM queue_history qh
+            JOIN queues q ON qh.queue_id = q.id
+            WHERE qh.user_id = ?
+            ORDER BY qh.join_time DESC
             LIMIT ?
         """
         results = self.db.execute_query(query, (user_id, limit))

@@ -12,6 +12,7 @@ class Config:
     AUTH_SERVICE_URL = os.getenv('AUTH_SERVICE_URL', 'http://auth-service:5001')
     BUSINESS_SERVICE_URL = os.getenv('BUSINESS_SERVICE_URL', 'http://business-service:5002')
     QUEUE_SERVICE_URL = os.getenv('QUEUE_SERVICE_URL', 'http://queue-service:5003')
+    FEEDBACK_SERVICE_URL = os.getenv('FEEDBACK_SERVICE_URL', 'http://feedback-service:5005')
 
     # Session Configuration
     SECRET_KEY = os.getenv('SECRET_KEY', 'your-secret-key-change-in-production')

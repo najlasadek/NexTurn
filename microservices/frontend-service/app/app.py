@@ -34,6 +34,7 @@ CORS(app, origins=Config.CORS_ORIGINS)
 AUTH_SERVICE = Config.AUTH_SERVICE_URL
 BUSINESS_SERVICE = Config.BUSINESS_SERVICE_URL
 QUEUE_SERVICE = Config.QUEUE_SERVICE_URL
+FEEDBACK_SERVICE = Config.FEEDBACK_SERVICE_URL
 
 
 def proxy_request(service_url, path, method='GET', data=None, headers=None):
@@ -63,15 +64,30 @@ def proxy_request(service_url, path, method='GET', data=None, headers=None):
         if method == 'GET':
             response = requests.get(url, headers=request_headers, timeout=10)
         elif method == 'POST':
-            response = requests.post(url, json=data, headers=request_headers, timeout=10)
+            # Only send json body if data is provided and not empty
+            if data:
+                response = requests.post(url, json=data, headers=request_headers, timeout=10)
+            else:
+                response = requests.post(url, headers=request_headers, timeout=10)
         elif method == 'PUT':
-            response = requests.put(url, json=data, headers=request_headers, timeout=10)
+            if data:
+                response = requests.put(url, json=data, headers=request_headers, timeout=10)
+            else:
+                response = requests.put(url, headers=request_headers, timeout=10)
         elif method == 'DELETE':
             response = requests.delete(url, headers=request_headers, timeout=10)
         else:
             return jsonify({'success': False, 'message': 'Invalid method'}), 400
 
-        return response.json(), response.status_code
+        # Handle empty responses
+        try:
+            if response.text:
+                return response.json(), response.status_code
+            else:
+                return jsonify({'success': True, 'message': 'Request successful'}), response.status_code
+        except ValueError:
+            # Response is not valid JSON
+            return jsonify({'success': False, 'message': 'Invalid response from service'}), 500
     except requests.exceptions.RequestException as e:
         return jsonify({'success': False, 'message': f'Service unavailable: {str(e)}'}), 503
 
@@ -229,7 +245,8 @@ def serve_next_api(queue_id):
 @app.route('/leave-queue', methods=['POST'], endpoint='leave_queue')
 def leave_queue():
     """Leave queue"""
-    data = request.get_json() or {}
+    # Handle empty request body gracefully
+    data = request.get_json(silent=True) or {}
     ticket_id = data.get('ticket_id')
     if ticket_id:
         return proxy_request(QUEUE_SERVICE, f'/api/tickets/{ticket_id}/cancel', method='POST', data=data)
@@ -240,18 +257,70 @@ def ticket_alerts():
     """Ticket alerts endpoint"""
     return jsonify({'success': True, 'message': 'Alerts enabled'}), 200
 
-@app.route('/feedback/<int:business_id>', methods=['GET', 'POST'])
+@app.route('/feedback/<int:business_id>', methods=['GET', 'POST'], endpoint='submit_feedback')
 def feedback(business_id):
     """Feedback page"""
     if request.method == 'GET':
-        return render_template('feedback_form.html')
-    # POST - submit feedback (placeholder)
-    return jsonify({'success': True, 'message': 'Feedback submitted'}), 200
+        # Fetch business info to pass to template
+        try:
+            business_response = proxy_request(BUSINESS_SERVICE, f'/api/businesses/{business_id}', method='GET')
+            if business_response[1] == 200 and business_response[0].get('success'):
+                business = business_response[0]['data']['business']
+                return render_template('feedback_form.html', 
+                                     business_id=business_id, 
+                                     business_name=business.get('name', 'Business'))
+            else:
+                return render_template('feedback_form.html', 
+                                     business_id=business_id, 
+                                     business_name='Business')
+        except Exception as e:
+            print(f"Error fetching business: {e}")
+            return render_template('feedback_form.html', 
+                                 business_id=business_id, 
+                                 business_name='Business')
+    
+    # POST - submit feedback
+    # Get user_id from session or user object
+    user_id = None
+    if session.get('user_id'):
+        user_id = session.get('user_id')
+    elif session.get('user') and isinstance(session.get('user'), dict):
+        user_id = session.get('user').get('id')
+    
+    if not user_id:
+        return jsonify({'success': False, 'message': 'Please log in to submit feedback'}), 401
+    
+    rating = request.form.get('rating')
+    comment = request.form.get('comment', '').strip()
+    
+    # Submit to feedback service
+    try:
+        feedback_data = {
+            'user_id': user_id,
+            'business_id': business_id,
+            'rating': int(rating) if rating else None,
+            'comment': comment
+        }
+        
+        # Submit to feedback service
+        response = requests.post(
+            f"{FEEDBACK_SERVICE}/feedback",
+            json=feedback_data,
+            timeout=5
+        )
+        
+        if response.status_code == 201:
+            return redirect(url_for('businesses_list'))
+        else:
+            return jsonify({'success': False, 'message': 'Failed to submit feedback'}), 400
+    except Exception as e:
+        print(f"Error submitting feedback: {e}")
+        return jsonify({'success': False, 'message': 'Error submitting feedback'}), 500
 
 @app.route('/business/<int:business_id>/feedback-list')
 def business_feedback_list(business_id):
     """Business feedback list"""
-    return render_template('feedback_list.html')
+    return render_template('feedback_list.html', business_id=business_id)
 
 @app.route('/favicon.ico')
 def favicon():
@@ -360,13 +429,23 @@ def business_queues_api(business_id):
 @app.route('/api/queues/<int:queue_id>/join', methods=['POST'])
 def join_queue_api(queue_id):
     """Join a queue API"""
-    data = request.get_json() or {}
+    # Join queue doesn't need a request body, just the queue_id in the URL
+    # Handle empty request body gracefully
+    data = None
+    if request.content_length and request.content_length > 0:
+        try:
+            data = request.get_json(silent=True) or {}
+        except Exception:
+            data = {}
+    
     return proxy_request(QUEUE_SERVICE, f'/api/queues/{queue_id}/join', method='POST', data=data)
 
 @app.route('/api/queues/<int:queue_id>/serve-next', methods=['POST'])
 def serve_next(queue_id):
     """Serve next customer in queue"""
-    data = request.get_json() or {}
+    # Serve next doesn't need a request body, just the queue_id in the URL
+    # Handle empty request body gracefully
+    data = request.get_json(silent=True) or {}
     return proxy_request(QUEUE_SERVICE, f'/api/queues/{queue_id}/serve-next', method='POST', data=data)
 
 @app.route('/api/tickets/<ticket_id>', methods=['GET'])
@@ -377,7 +456,9 @@ def get_ticket(ticket_id):
 @app.route('/api/tickets/<ticket_id>/cancel', methods=['POST'])
 def cancel_ticket(ticket_id):
     """Cancel a ticket"""
-    data = request.get_json() or {}
+    # Cancel ticket doesn't need a request body, just the ticket_id in the URL
+    # Handle empty request body gracefully
+    data = request.get_json(silent=True) or {}
     return proxy_request(QUEUE_SERVICE, f'/api/tickets/{ticket_id}/cancel', method='POST', data=data)
 
 @app.route('/api/tickets/my-active', methods=['GET'])
@@ -389,6 +470,16 @@ def my_active_ticket():
 def my_ticket_history():
     """Get user's ticket history"""
     return proxy_request(QUEUE_SERVICE, '/api/tickets/my-history', method='GET')
+
+@app.route('/api/feedback/business/<int:business_id>', methods=['GET'])
+def get_business_feedback(business_id):
+    """Get feedback for a business"""
+    return proxy_request(FEEDBACK_SERVICE, f'/feedback/business/{business_id}', method='GET')
+
+@app.route('/api/feedback/business/<int:business_id>/average', methods=['GET'])
+def get_business_average_rating(business_id):
+    """Get average rating for a business"""
+    return proxy_request(FEEDBACK_SERVICE, f'/feedback/business/{business_id}/average', method='GET')
 
 @app.route('/api/queue-health', methods=['GET'])
 def queue_health():
